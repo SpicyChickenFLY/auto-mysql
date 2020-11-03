@@ -41,11 +41,11 @@ update mysql.user set authentication_string=password('123')
 
 User Interface
 
-![](./src/1.png)
+![](src/1.png)
 
 Running Log
 
-![](./src/2.png)
+![](src/2.png)
 
 
 ## Further Work
