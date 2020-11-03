@@ -30,7 +30,7 @@ func TestCreateUserWithGroup(t *testing.T) {
 		groupName string
 	}
 	testCases := []testCaseTemplate{
-		testCaseTemplate{
+		{
 			userName:  "test_user_2",
 			groupName: "test_group_2",
 		},

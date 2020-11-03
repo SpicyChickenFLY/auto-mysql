@@ -9,7 +9,7 @@ import (
 
 const (
 	// dir
-	BASE_DIR_KEY = "basedir"
+	// BASE_DIR_KEY = "basedir"
 	DATA_DIR_KEY = "datadir"
 	TMP_DIR_KEY  = "tmpdir"
 	UNDO_LOG_KEY = "innodb_undo_directory"
@@ -29,7 +29,6 @@ const (
 func checkCnfDir(srcCnfFile, userName, groupName string, fileMode uint32) error {
 	// Initialize map dictionary
 	confDirKV := map[string]string{
-		BASE_DIR_KEY: "",
 		DATA_DIR_KEY: "",
 		TMP_DIR_KEY:  "",
 		UNDO_LOG_KEY: "",
@@ -52,17 +51,16 @@ func checkCnfDir(srcCnfFile, userName, groupName string, fileMode uint32) error 
 	br := bufio.NewReader(fr)
 	for {
 		line, _, err := br.ReadLine()
-		switch err {
-		case io.EOF:
-			break
-		case nil:
-		default:
+		if err == io.EOF {
+			return nil
+		} else if err != nil {
 			return err
 		}
 
 		lineStr := strings.Split(string(line), "#")[0] // remove comment in kv line
 		lineStr = strings.TrimSpace(lineStr)           // remove prefix/posfix space
-		signIndex := strings.Index(lineStr, "=")       // roughly separate kv
+		// fmt.Println(lineStr)
+		signIndex := strings.Index(lineStr, "=") // roughly separate kv
 		if signIndex < 0 {
 			continue // ignore blank line
 		}
@@ -74,7 +72,7 @@ func checkCnfDir(srcCnfFile, userName, groupName string, fileMode uint32) error 
 		if _, ok := confDirKV[key]; ok {
 			cnfDir := strings.TrimSpace(lineStr[signIndex+1:])
 			if len(cnfDir) != 0 {
-				if err := createDirWithDetail(
+				if err := createDirWithDetailShell(
 					cnfDir, userName, groupName, fileMode); err != nil {
 					return err
 				}
@@ -90,7 +88,7 @@ func checkCnfDir(srcCnfFile, userName, groupName string, fileMode uint32) error 
 			}
 			cnfDir := cnfFile[:signIndex] // get prefix dir by split '/'
 			if len(cnfDir) != 0 {
-				if err := createDirWithDetail(
+				if err := createDirWithDetailShell(
 					cnfDir, userName, groupName, fileMode); err != nil {
 					return err
 				}

@@ -12,7 +12,7 @@ func TestInitMysql(t *testing.T) {
 	asst := assert.New(t)
 	for testCaseIndex, testCase := range testCases {
 		// Feasibility test
-		err := initMysql(testCase)
+		err := initMysql(testCase, USER_NAME)
 		asst.Nil(err, fmt.Sprintf(
 			"initMysql failed - testCase%2d:%v", testCaseIndex, err))
 	}

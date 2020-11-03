@@ -15,7 +15,7 @@ func TestCheckCnfDir(t *testing.T) {
 		fileMode  uint32
 	}
 	testCases := []testCaseTemplate{
-		testCaseTemplate{
+		{
 			cnfDir:    "testdst/my.cnf",
 			userName:  USER_NAME,
 			groupName: GROUP_NAME,

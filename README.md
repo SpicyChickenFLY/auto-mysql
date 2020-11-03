@@ -37,6 +37,25 @@ update mysql.user set authentication_string=password('123')
 
 
 
+## Program Interface
+
+User Interface
+
+![](D:\Code\GoStudy\src\spicychicken.top\auto-mysql\src\1.png)
+
+Running Log
+
+![](D:\Code\GoStudy\src\spicychicken.top\auto-mysql\src\2.png)
+
+
+## Further Work
+
+1. Reconstruct shell command call
+2. Deeper custom for user
+3. Detailed module test
+
+
+
 ## FAQ
 
 1.有啥用？
