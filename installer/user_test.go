@@ -18,7 +18,7 @@ func TestCreateUser(t *testing.T) {
 	}
 	asst := assert.New(t)
 	for testCaseIndex, testCase := range testCases {
-		err := createUser(testCase)
+		err := useradd(testCase)
 		asst.Nil(err, fmt.Sprintf(
 			"createUser failed - testCase%2d:%v", testCaseIndex, err))
 	}

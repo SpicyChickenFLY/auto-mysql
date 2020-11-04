@@ -72,7 +72,7 @@ func checkCnfDir(srcCnfFile, userName, groupName string, fileMode uint32) error 
 		if _, ok := confDirKV[key]; ok {
 			cnfDir := strings.TrimSpace(lineStr[signIndex+1:])
 			if len(cnfDir) != 0 {
-				if err := createDirWithDetailShell(
+				if err := createDirWithDetail(
 					cnfDir, userName, groupName, fileMode); err != nil {
 					return err
 				}
@@ -88,7 +88,7 @@ func checkCnfDir(srcCnfFile, userName, groupName string, fileMode uint32) error 
 			}
 			cnfDir := cnfFile[:signIndex] // get prefix dir by split '/'
 			if len(cnfDir) != 0 {
-				if err := createDirWithDetailShell(
+				if err := createDirWithDetail(
 					cnfDir, userName, groupName, fileMode); err != nil {
 					return err
 				}

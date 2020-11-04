@@ -1,14 +1,10 @@
 package installer
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/romberli/log"
 )
-
-var out bytes.Buffer
-var stderr bytes.Buffer
 
 const (
 	USER_NAME     = "mysql"
@@ -33,103 +29,42 @@ func Install(
 	srcSqlFile, dstSqlPath,
 	srcCnfFile, dstCnfFile string) error {
 	// Create group/user
-	log.Info(fmt.Sprintf("createUserWithGroup(%s,%s):", USER_NAME, GROUP_NAME))
-	if err := createUserWithGroup(USER_NAME, GROUP_NAME); err != nil {
-		fmt.Printf("[ %s ] Create group/user\n",
-			RenderStr("FAIL", "highlight", "black", "red"))
-		return err
-	}
-	fmt.Printf("[  %s  ] Create group/user\n",
-		RenderStr("OK", "highlight", "black", "green"))
+	log.Info(fmt.Sprintf(
+		"createUserWithGroup(%s,%s):",
+		USER_NAME, GROUP_NAME))
+	checkErr(
+		createUserWithGroup(USER_NAME, GROUP_NAME),
+		"Create group/user")
 
 	// Decompress the archive
-	log.Info(fmt.Sprintf("extactFile(%s,%s):", srcSqlFile, dstSqlPath))
-	if err := extractFile(srcSqlFile, dstSqlPath); err != nil {
-		fmt.Printf("[ %s ] Decompress the archive\n",
-			RenderStr("FAIL", "highlight", "black", "red"))
-		return err
-	}
-	fmt.Printf("[  %s  ] Decompress the archive\n",
-		RenderStr("OK", "highlight", "black", "green"))
+	log.Info(fmt.Sprintf(
+		"extactFile(%s,%s):", srcSqlFile, dstSqlPath))
+	checkErr(
+		extractSqlFile(srcSqlFile, dstSqlPath),
+		"Decompress the archive")
 
 	// Move configure file
-	log.Info(fmt.Sprintf("extactFile(%s,%s):", srcSqlFile, dstSqlPath))
-	if err := moveCnfFile(srcCnfFile, dstCnfFile); err != nil {
-		fmt.Printf("[ %s ] Move configure file\n",
-			RenderStr("FAIL", "highlight", "black", "red"))
-		return err
-	}
-	fmt.Printf("[  %s  ] Move configure file\n",
-		RenderStr("OK", "highlight", "black", "green"))
+	log.Info(fmt.Sprintf(
+		"moveCnfFile(%s,%s):", srcCnfFile, dstCnfFile))
+	checkErr(
+		moveCnfFile(srcCnfFile, dstCnfFile),
+		"Move configure file")
 
 	// Create data directory
 	log.Info(fmt.Sprintf("checkCnfDir(%s,%s,%s,%4d)",
 		dstCnfFile, USER_NAME, GROUP_NAME, FILE_MODE))
-	if err := checkCnfDir(
-		dstCnfFile, USER_NAME, GROUP_NAME, FILE_MODE); err != nil {
-		fmt.Printf("[ %s ] Create data directory\n",
-			RenderStr("FAIL", "highlight", "black", "red"))
-		return err
-	}
-	fmt.Printf("[  %s  ] Create data directory\n",
-		RenderStr("OK", "highlight", "black", "green"))
+	checkErr(
+		checkCnfDir(dstCnfFile, USER_NAME, GROUP_NAME, FILE_MODE),
+		"Create data directory")
 
 	// Initialize MySQL(without password)
 	log.Info(fmt.Sprintf("initMysql(%s,%s)", dstSqlPath, USER_NAME))
-	if err := initMysql(dstSqlPath, USER_NAME); err != nil {
-		fmt.Printf("[ %s ] Initialize MySQL(without password)\n",
-			RenderStr("FAIL", "highlight", "black", "red"))
-		return err
-	}
-	fmt.Printf("[  %s  ] Initialize MySQL(without password)\n",
-		RenderStr("OK", "highlight", "black", "green"))
+	checkErr(
+		initMysql(dstSqlPath, USER_NAME),
+		"Initialize MySQL(without password)")
 
-	fmt.Println((RenderStr("Install Compelete\n", "highlight", "black", "red")))
+	fmt.Println((RenderStr("Install Compelete\n", "highlight", "black", "green")))
 	log.Info("Install Compelete")
-	return nil
-}
-
-func TestInstall(
-	startPos int,
-	srcSqlFile, dstSqlPath,
-	srcCnfFile, dstCnfFile string) error {
-	switch startPos {
-	case 0:
-		if err := createUserWithGroup(USER_NAME, GROUP_NAME); err != nil {
-			return err
-		}
-		fallthrough
-	case 1:
-		if err := unTarWithGzipShell(srcSqlFile, dstSqlPath); err != nil {
-			return err
-		}
-		fallthrough
-	case 2:
-		if err := modifyDir(dstSqlPath, USER_NAME, GROUP_NAME, FILE_MODE); err != nil {
-			return err
-		}
-		fallthrough
-	case 3:
-		if err := moveFile(srcCnfFile, dstCnfFile); err != nil {
-			return err
-		}
-		fallthrough
-	case 4:
-		if err := modifyDir(dstCnfFile, USER_NAME, GROUP_NAME, CNF_FILE_MODE); err != nil {
-			return err
-		}
-		fallthrough
-	case 5:
-		if err := checkCnfDir(
-			dstCnfFile, USER_NAME, GROUP_NAME, FILE_MODE); err != nil {
-			return err
-		}
-		fallthrough
-	case 6:
-		if err := initMysql(dstSqlPath, USER_NAME); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -138,28 +73,16 @@ func Remove() {
 
 }
 
-func extractFile(srcSqlFile, dstSqlPath string) error {
-	// Extract File from *.tar.gz
-	if err := unTarWithGzipShell(srcSqlFile, dstSqlPath); err != nil {
-		return err
+func checkErr(err error, info string) {
+	if err != nil {
+		fmt.Printf("[ %s ] %s\n",
+			RenderStr("FAIL", "highlight", "black", "red"), info)
+		fmt.Println(err)
+		fmt.Println((RenderStr("Install Failed\n", "highlight", "black", "red")))
+		log.Info("Install Failed")
+		panic("exit")
+	} else {
+		fmt.Printf("[  %s  ] %s\n",
+			RenderStr("OK", "highlight", "black", "green"), info)
 	}
-	// Move mysql file to parent dir
-	if err := moveFileShell(dstSqlPath+"/mysql-*/*", dstSqlPath); err != nil {
-		return err
-	}
-	// Modify Directory/File
-	if err := modifyDir(dstSqlPath, USER_NAME, GROUP_NAME, FILE_MODE); err != nil {
-		return err
-	}
-	return nil
-}
-
-func moveCnfFile(srcCnfFile, dstCnfFile string) error {
-	if err := copyFileShell(srcCnfFile, dstCnfFile); err != nil {
-		return err
-	}
-	if err := modifyDir(dstCnfFile, USER_NAME, GROUP_NAME, CNF_FILE_MODE); err != nil {
-		return err
-	}
-	return nil
 }

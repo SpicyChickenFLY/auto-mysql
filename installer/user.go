@@ -1,7 +1,6 @@
 package installer
 
 import (
-	"fmt"
 	"io"
 	"os/exec"
 	"os/user"
@@ -11,43 +10,12 @@ import (
 
 // Warning: Do NOT create passwd for user "mysql"!!!
 
-func createUser(userName string) error {
-	if _, ok := findUser(userName); ok {
-		return nil
-	}
-	cmdAddUser := exec.Command(
-		"/bin/sh", "-c",
-		fmt.Sprintf("sudo useradd -M %s", userName))
-	cmdAddUser.Stdout = &out
-	cmdAddUser.Stderr = &stderr
-	if err := cmdAddUser.Run(); err != nil {
-		log.Warnf("cmdAddUser:%s:%s\n",
-			err, stderr.String())
-		fmt.Printf(
-			"cmdAddUser: %s:%s\n",
-			err, stderr.String())
-		return err
-	}
-
-	return nil
-}
-
 func createUserWithGroup(userName string, groupName string) error {
 	if _, ok := findGroup(groupName); ok {
 		log.Warn("Group already exists!")
 		return nil
 	}
-	cmdAddGroup := exec.Command(
-		"/bin/sh", "-c",
-		fmt.Sprintf("sudo groupadd %s", groupName))
-	cmdAddGroup.Stdout = &out
-	cmdAddGroup.Stderr = &stderr
-	if err := cmdAddGroup.Run(); err != nil {
-		log.Warnf("cmdAddGroup:%s:%s\n",
-			err, stderr.String())
-		fmt.Printf(
-			"cmdAddGroup: %s:%s\n",
-			err, stderr.String())
+	if err := groupadd(groupName); err != nil {
 		return err
 	}
 
@@ -55,19 +23,7 @@ func createUserWithGroup(userName string, groupName string) error {
 		log.Warn("User already exists!")
 		return nil
 	}
-	cmdAddUser := exec.Command(
-		"/bin/sh", "-c",
-		fmt.Sprintf(
-			"sudo useradd -M -s /sbin/nologin -g %s %s",
-			groupName, userName))
-	cmdAddUser.Stdout = &out
-	cmdAddUser.Stderr = &stderr
-	if err := cmdAddUser.Run(); err != nil {
-		log.Warnf("cmdAddUser:%s:%s\n",
-			err, stderr.String())
-		fmt.Printf(
-			"cmdAddUser: %s:%s\n",
-			err, stderr.String())
+	if err := useradd(userName); err != nil {
 		return err
 	}
 	return nil

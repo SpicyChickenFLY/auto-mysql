@@ -38,15 +38,13 @@ func main() {
 	fmt.Print("============================\n\n")
 
 	// Custom parameters
-	mode := flag.String("m", "install", "install/remove/test")
+	installMode := flag.String("m", "install", "install/remove/test")
 	srcSqlFile := flag.String(
 		"s", SRC_SQL_FILE, "postion of mysql-binary file")
 	dstSqlPath := flag.String(
 		"d", DST_SQL_PATH, "position for installation")
 	srcCnfFile := flag.String(
 		"c", SRC_CNF_FILE, "postion of you configure file")
-	startPos := flag.Int(
-		"p", 0, "startPhase")
 
 	// Fixed parameters
 	dstCnfFile := DST_CNF_FILE
@@ -56,34 +54,17 @@ func main() {
 	log.Info(fmt.Sprintf("srcSqlFile: %s", *srcSqlFile))
 	log.Info(fmt.Sprintf("dstSqlPath: %s", *dstSqlPath))
 	log.Info(fmt.Sprintf("srcCnfFile: %s", *srcCnfFile))
-	log.Info(fmt.Sprintf("startPos: %d", *startPos))
 
 	fmt.Println("Please check your input parameter:")
 	fmt.Printf("srcSqlFile: %s\n", *srcSqlFile)
 	fmt.Printf("dstSqlPath: %s\n", *dstSqlPath)
-	fmt.Printf("srcCnfFile: %s\n", *srcCnfFile)
-	fmt.Printf("startPos: %d\n", *startPos)
+	fmt.Printf("srcCnfFile: %s\n\n", *srcCnfFile)
 
-	// Analyze the running mode
-	if *mode == "test" {
-		log.Info("MySQL automatic installation test started")
-		if err := installer.TestInstall(
-			*startPos, *srcSqlFile, *dstSqlPath,
-			*srcCnfFile, dstCnfFile); err != nil {
-			fmt.Println(err)
-			log.Info("MySQL automatic installation test failed")
-		}
-		log.Info("MySQL automatic installation test succeed")
-	} else if *mode == "install" {
-		log.Info("MySQL automatic installation started")
-		if err := installer.Install(
+	// Analyze the installMode
+	if *installMode == "install" {
+		installer.Install(
 			*srcSqlFile, *dstSqlPath,
-			*srcCnfFile, dstCnfFile); err != nil {
-			fmt.Println(err)
-			log.Info("MySQL automatic installation failed")
-			return
-		}
-		log.Info("MySQL automatic installation succeed")
+			*srcCnfFile, dstCnfFile)
 	} else {
 		installer.Remove()
 	}

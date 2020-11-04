@@ -22,35 +22,7 @@ import (
 // === RUN   TestModifyDir
 // --- PASS: TestModifyDir (0.09s)
 
-func TestMoveFile(t *testing.T) {
-	type testCaseTemplate struct {
-		srcPath string
-		dstPath string
-	}
-	testCases := []testCaseTemplate{
-		{
-			srcPath: "testsrc/1.tar.gz",
-			dstPath: "testdst/4.tar.gz",
-		},
-		{
-			srcPath: "testdst/4.tar.gz",
-			dstPath: "testdst/5.tar.gz",
-		},
-		{
-			srcPath: "testdst/5.tar.gz",
-			dstPath: "testsrc/1.tar.gz",
-		},
-	}
-	asst := assert.New(t)
-	for testCaseIndex, testCase := range testCases {
-		// Feasibility test
-		err := moveFile(testCase.srcPath, testCase.dstPath)
-		asst.Nil(err, fmt.Sprintf(
-			"createDir failed - testCase%2d:%v", testCaseIndex, err))
-	}
-}
-
-func TestUnTarWithGzipGo(t *testing.T) {
+func TestUnTarWithGzipShell(t *testing.T) {
 	type testCaseTemplate struct {
 		srcFile string
 		dstPath string
@@ -72,27 +44,12 @@ func TestUnTarWithGzipGo(t *testing.T) {
 	asst := assert.New(t)
 	for testCaseIndex, testCase := range testCases {
 		// Feasibility test
-		err := unTarWithGzipGo(
+		err := unTarWithGzipShell(
 			testCase.srcFile,
 			testCase.dstPath,
 		)
 		asst.Nil(err, fmt.Sprintf(
 			"unTar failed - testCase%2d:%v", testCaseIndex, err))
-	}
-}
-
-func TestCreateDir(t *testing.T) {
-	testCases := []string{
-		"testdst/4",
-		"testdst/4/5",
-		"testdst/4/6",
-	}
-	asst := assert.New(t)
-	for testCaseIndex, testCase := range testCases {
-		// Feasibility test
-		err := createDir(testCase)
-		asst.Nil(err, fmt.Sprintf(
-			"createDir failed - testCase%2d:%v", testCaseIndex, err))
 	}
 }
 
@@ -110,7 +67,7 @@ func TestCreateDirWithDetail(t *testing.T) {
 	}
 }
 
-func TestModifyOwner(t *testing.T) {
+func TestModify(t *testing.T) {
 	testCases := []string{
 		"testdst/4",
 		"testdst/4/5",
@@ -119,37 +76,7 @@ func TestModifyOwner(t *testing.T) {
 	asst := assert.New(t)
 	for testCaseIndex, testCase := range testCases {
 		// Feasibility test
-		err := modifyOwner(testCase, USER_NAME, GROUP_NAME)
-		asst.Nil(err, fmt.Sprintf(
-			"Modify Owner failed - testCase%2d:%v", testCaseIndex, err))
-	}
-}
-
-func TestModifyMode(t *testing.T) {
-	testCases := []string{
-		"testdst/4",
-		"testdst/4/5",
-		"testdst/4/6",
-	}
-	asst := assert.New(t)
-	for testCaseIndex, testCase := range testCases {
-		// Feasibility test
-		err := modifyMode(testCase, FILE_MODE)
-		asst.Nil(err, fmt.Sprintf(
-			"modifyMode failed - testCase%2d:%v", testCaseIndex, err))
-	}
-}
-
-func TestModifyDir(t *testing.T) {
-	testCases := []string{
-		"testdst/4",
-		"testdst/4/5",
-		"testdst/4/6",
-	}
-	asst := assert.New(t)
-	for testCaseIndex, testCase := range testCases {
-		// Feasibility test
-		err := modifyDir(testCase, USER_NAME, GROUP_NAME, FILE_MODE)
+		err := modify(testCase, USER_NAME, GROUP_NAME, FILE_MODE)
 		asst.Nil(err, fmt.Sprintf(
 			"createDir failed - testCase%2d:%v", testCaseIndex, err))
 	}
