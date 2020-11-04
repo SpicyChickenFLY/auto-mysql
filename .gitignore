@@ -11,6 +11,7 @@
 
 # Test file
 test*/
+*.tar.gz
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
@@ -18,5 +19,3 @@ test*/
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-# mysql file
-mysql*.tar.gz
