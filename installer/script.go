@@ -78,7 +78,7 @@ func checkErr(err error, info string) {
 		fmt.Printf("[ %s ] %s\n",
 			RenderStr("FAIL", "highlight", "black", "red"), info)
 		fmt.Println(err)
-		fmt.Println((RenderStr("Install Failed\n", "highlight", "black", "red")))
+		fmt.Println((RenderStr("Install Failed", "highlight", "black", "red")))
 		log.Info("Install Failed")
 		panic("exit")
 	} else {

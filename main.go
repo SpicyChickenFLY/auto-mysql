@@ -17,7 +17,7 @@ const (
 	// LOG_MAX_BACKUPS   = 5
 
 	SRC_SQL_FILE = "./src/mysql/mysql.tar.gz"
-	DST_SQL_PATH = "/usr/local/mysql"
+	DST_SQL_PATH = "/home/chow/Softs/mysql"
 	SRC_CNF_FILE = "./src/conf/my.cnf"
 	DST_CNF_FILE = "/etc/my.cnf"
 )

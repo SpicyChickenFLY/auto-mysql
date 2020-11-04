@@ -13,19 +13,20 @@ import (
 func createUserWithGroup(userName string, groupName string) error {
 	if _, ok := findGroup(groupName); ok {
 		log.Warn("Group already exists!")
-		return nil
-	}
-	if err := groupadd(groupName); err != nil {
-		return err
+	} else {
+		if err := groupadd(groupName); err != nil {
+			return err
+		}
 	}
 
 	if _, ok := findUser(userName); ok {
 		log.Warn("User already exists!")
-		return nil
+	} else {
+		if err := useraddWithGroup(userName, groupName); err != nil {
+			return err
+		}
 	}
-	if err := useradd(userName); err != nil {
-		return err
-	}
+
 	return nil
 }
 

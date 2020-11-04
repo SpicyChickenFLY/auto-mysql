@@ -39,9 +39,9 @@ func cp(srcFile, dstFile string) error {
 }
 
 func chown(dirPath, userName, groupName string) error {
-	// sudo chown -R userName:groupName dirPath
+	// sudo chown -R userName.groupName dirPath
 	return execCommand(
-		fmt.Sprintf("sudo chown -R %s:%s %s", userName, groupName, dirPath))
+		fmt.Sprintf("sudo chown -R %s.%s %s", userName, groupName, dirPath))
 
 }
 
@@ -73,4 +73,9 @@ func groupadd(groupName string) error {
 	return execCommand(
 		fmt.Sprintf("sudo groupadd %s", groupName))
 
+}
+
+func useraddWithGroup(userName, groupName string) error {
+	return execCommand(
+		fmt.Sprintf("sudo useradd -M -g %s %s", groupName, userName))
 }
