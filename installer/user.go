@@ -22,7 +22,7 @@ func createUserWithGroup(userName string, groupName string) error {
 	if _, ok := findUser(userName); ok {
 		log.Warn("User already exists!")
 	} else {
-		if err := useraddWithGroup(userName, groupName); err != nil {
+		if err := useraddWithGroup(groupName, userName); err != nil {
 			return err
 		}
 	}

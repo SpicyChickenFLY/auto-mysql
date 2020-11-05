@@ -23,7 +23,7 @@ const (
 //  3. Move configure file
 //  4. Create data directory
 //  5. Initialize MySQL(without password)
-//  6. Start server
+//  6. Start MySQL instance
 //  7. TODO: change the password for root in mysql
 func Install(
 	srcSqlFile, dstSqlPath,
@@ -62,6 +62,12 @@ func Install(
 	checkErr(
 		initMysql(dstSqlPath, USER_NAME),
 		"Initialize MySQL(without password)")
+
+	// Start MySQL instance
+	log.Info(fmt.Sprintf("startMysql(%s)", dstSqlPath))
+	checkErr(
+		startMysql(dstSqlPath),
+		"Start MySQL instance")
 
 	fmt.Println((RenderStr("Install Compelete\n", "highlight", "black", "green")))
 	log.Info("Install Compelete")
