@@ -15,7 +15,7 @@ const (
 	UNDO_LOG_KEY = "innodb_undo_directory"
 	// file
 	SOCK_KEY      = "socket"
-	PID_FILE_KEY  = "pid_file"
+	PID_FILE_KEY  = "pid-file"
 	ERR_LOG_KEY   = "log_error"
 	BIN_LOG_KEY   = "log-bin"
 	RELAY_LOG_KEY = "relay_log"

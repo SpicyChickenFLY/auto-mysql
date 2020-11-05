@@ -18,7 +18,7 @@ func initMysql(dstPath, userName string) error {
 
 func startMysql(dstPath string) error {
 	// move mysql.server to /etc/init.d/mysqld for auto start
-	if err := mv(
+	if err := cp(
 		dstPath+"/"+SERVER_FILE_REL, DST_SERVER_FILE); err != nil {
 		return err
 	}
