@@ -75,7 +75,7 @@ func groupadd(groupName string) error {
 
 }
 
-func useraddWithGroup(userName, groupName string) error {
+func useraddWithGroup(groupName, userName string) error {
 	return execCommand(
 		fmt.Sprintf("sudo useradd -M -g %s %s", groupName, userName))
 }

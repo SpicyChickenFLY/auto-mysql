@@ -40,7 +40,7 @@ func createDirWithDetail(
 }
 
 // unTarWithGzip extract a .tar.gz file by name write in SHELL
-func unTarWithGzipShell(srcFile string, dstPath string) error {
+func unTarWithGzip(srcFile string, dstPath string) error {
 	if err := mkdir(dstPath); err != nil {
 		return err
 	}
@@ -53,7 +53,7 @@ func unTarWithGzipShell(srcFile string, dstPath string) error {
 
 func extractSqlFile(srcSqlFile, dstSqlPath string) error {
 	// Extract File from *.tar.gz
-	if err := unTarWithGzipShell(srcSqlFile, dstSqlPath); err != nil {
+	if err := unTarWithGzip(srcSqlFile, dstSqlPath); err != nil {
 		return err
 	}
 	// Move mysql file to parent dir

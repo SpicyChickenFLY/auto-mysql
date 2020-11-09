@@ -22,7 +22,22 @@ import (
 // === RUN   TestModifyDir
 // --- PASS: TestModifyDir (0.09s)
 
-func TestUnTarWithGzipShell(t *testing.T) {
+func TestModify(t *testing.T) {
+	testCases := []string{
+		"testdst/4",
+		"testdst/4/5",
+		"testdst/4/6",
+	}
+	asst := assert.New(t)
+	for testCaseIndex, testCase := range testCases {
+		// Feasibility test
+		err := modify(testCase, USER_NAME, GROUP_NAME, FILE_MODE)
+		asst.Nil(err, fmt.Sprintf(
+			"createDir failed - testCase%2d:%v", testCaseIndex, err))
+	}
+}
+
+func TestUnTarWithGzip(t *testing.T) {
 	type testCaseTemplate struct {
 		srcFile string
 		dstPath string
@@ -44,7 +59,7 @@ func TestUnTarWithGzipShell(t *testing.T) {
 	asst := assert.New(t)
 	for testCaseIndex, testCase := range testCases {
 		// Feasibility test
-		err := unTarWithGzipShell(
+		err := unTarWithGzip(
 			testCase.srcFile,
 			testCase.dstPath,
 		)
@@ -67,17 +82,6 @@ func TestCreateDirWithDetail(t *testing.T) {
 	}
 }
 
-func TestModify(t *testing.T) {
-	testCases := []string{
-		"testdst/4",
-		"testdst/4/5",
-		"testdst/4/6",
-	}
-	asst := assert.New(t)
-	for testCaseIndex, testCase := range testCases {
-		// Feasibility test
-		err := modify(testCase, USER_NAME, GROUP_NAME, FILE_MODE)
-		asst.Nil(err, fmt.Sprintf(
-			"createDir failed - testCase%2d:%v", testCaseIndex, err))
-	}
-}
+func TestExtractSqlFile(t *testing.T) {}
+
+func TestMoveCnfFile(t *testing.T) {}

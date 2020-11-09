@@ -53,6 +53,7 @@ Running Log
 1. Reconstruct shell command call
 2. Deeper custom for user
 3. Detailed module test
+4. analyze OS and install dependency
 
 
 
