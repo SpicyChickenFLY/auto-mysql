@@ -79,3 +79,8 @@ func useraddWithGroup(userName, groupName string) error {
 	return execCommand(
 		fmt.Sprintf("sudo useradd -M -g %s %s", groupName, userName))
 }
+
+// TODO: Install following dependencies
+// sudo apt-cache search libaio
+// sudo apt install libaio1
+// sudo apt install linbcurses5
