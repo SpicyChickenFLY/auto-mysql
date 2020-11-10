@@ -24,6 +24,7 @@ const (
 
 )
 
+// checkCnfDir is a func to find all specified k-v pair in configure file
 // FIXME: for now it only support single instance conf
 // FIXME: for now "basedir" & "datadir" must be written in conf
 func checkCnfDir(srcCnfFile, userName, groupName string, fileMode uint32) error {

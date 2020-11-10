@@ -1,4 +1,4 @@
-package installer
+package colorful
 
 import "fmt"
 
@@ -12,7 +12,6 @@ import "fmt"
 // 35  45  紫红色
 // 36  46  青蓝色
 // 37  47  白色
-
 const (
 	FrontBlack = iota + 30
 	FrontRed
@@ -23,7 +22,6 @@ const (
 	FrontCyan
 	FrontWhite
 )
-
 const (
 	BackBlack = iota + 40
 	BackRed
@@ -43,7 +41,6 @@ const (
 //  5  闪烁
 //  7  反白显示
 //  8  不可见
-
 const (
 	ModeDefault   = 0
 	ModeHighLight = 1
@@ -87,6 +84,11 @@ var backMap = map[string]int{
 	"white":  BackWhite,
 }
 
+// RenderStr is a func for render string with specified color and style
+// str:  		your output string
+// modeStr: 	your mode string(default/highlight/line/flash/rewrite/hidden)
+// bColorStr:	your back color string(black/red/yellow/green/blue/cyan/purple/white)
+// fColorStr: 	your front color string(same as back color)
 func RenderStr(str, modeStr, bColorStr, fColorStr string) string {
 	mode, ok := modeMap[modeStr]
 	if !ok {

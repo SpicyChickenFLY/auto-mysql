@@ -12,18 +12,6 @@ import (
 // === RUN   TestCreateUserWithGroup
 // --- PASS: TestCreateUserWithGroup (0.09s)
 
-func TestCreateUser(t *testing.T) {
-	testCases := []string{
-		"test_user_1",
-	}
-	asst := assert.New(t)
-	for testCaseIndex, testCase := range testCases {
-		err := useradd(testCase)
-		asst.Nil(err, fmt.Sprintf(
-			"createUser failed - testCase%2d:%v", testCaseIndex, err))
-	}
-}
-
 func TestCreateUserWithGroup(t *testing.T) {
 	type testCaseTemplate struct {
 		userName  string

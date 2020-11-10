@@ -3,6 +3,7 @@ package installer
 import (
 	"fmt"
 
+	"github.com/SpicyChickenFLY/auto-mysql/installer/colorful"
 	"github.com/romberli/log"
 )
 
@@ -69,26 +70,28 @@ func Install(
 		startMysql(dstSqlPath),
 		"Start MySQL instance")
 
-	fmt.Println((RenderStr("Install Compelete\n", "highlight", "black", "green")))
+	fmt.Println((colorful.RenderStr("Install Compelete\n", "highlight", "black", "green")))
 	log.Info("Install Compelete")
 	return nil
 }
 
+// Remove all file you installed and restore your configure
 // TODO: feature: auto uninstall
 func Remove() {
 
 }
 
+// checkErr is a built-in func for checking error and output its result
 func checkErr(err error, info string) {
 	if err != nil {
 		fmt.Printf("[ %s ] %s\n",
-			RenderStr("FAIL", "highlight", "black", "red"), info)
+			colorful.RenderStr("FAIL", "highlight", "black", "red"), info)
 		fmt.Println(err)
-		fmt.Println((RenderStr("Install Failed", "highlight", "black", "red")))
+		fmt.Println((colorful.RenderStr("Install Failed", "highlight", "black", "red")))
 		log.Info("Install Failed")
 		panic("exit")
 	} else {
 		fmt.Printf("[  %s  ] %s\n",
-			RenderStr("OK", "highlight", "black", "green"), info)
+			colorful.RenderStr("OK", "highlight", "black", "green"), info)
 	}
 }
