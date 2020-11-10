@@ -1,32 +1,26 @@
 package installer
 
-import (
-	"fmt"
-	"testing"
+import "testing"
 
-	"github.com/stretchr/testify/assert"
-)
-
-func TestCheckCnfDir(t *testing.T) {
-	type testCaseTemplate struct {
-		cnfDir    string
-		userName  string
-		groupName string
-		fileMode  uint32
+func Test_checkCnfDir(t *testing.T) {
+	type args struct {
+		srcCnfFile string
+		userName   string
+		groupName  string
+		fileMode   uint32
 	}
-	testCases := []testCaseTemplate{
-		{
-			cnfDir:    "testdst/my.cnf",
-			userName:  USER_NAME,
-			groupName: GROUP_NAME,
-			fileMode:  FILE_MODE,
-		},
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
 	}
-	asst := assert.New(t)
-	for testCaseIndex, testCase := range testCases {
-		err := checkCnfDir(
-			testCase.cnfDir, testCase.userName, testCase.groupName, testCase.fileMode)
-		asst.Nil(err, fmt.Sprintf(
-			"checkCnfDir failed - testCase%2d:%v", testCaseIndex, err))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := checkCnfDir(tt.args.srcCnfFile, tt.args.userName, tt.args.groupName, tt.args.fileMode); (err != nil) != tt.wantErr {
+				t.Errorf("checkCnfDir() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }

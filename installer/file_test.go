@@ -1,87 +1,128 @@
 package installer
 
-import (
-	"fmt"
-	"testing"
+import "testing"
 
-	"github.com/stretchr/testify/assert"
-)
-
-// === RUN   TestUnTarWithGzipGo
-// 1               2/2Byte
-// 2/              0
-// 2/1             2/2Byte
-// 3/              0
-// 3/1             2/2Byte
-// 3/3             3/3Byte
-// --- PASS: TestUnTarWithGzipGo (0.00s)
-// === RUN   TestMoveFile
-// --- PASS: TestMoveFile (0.00s)
-// === RUN   TestCreateDir
-// --- PASS: TestCreateDir (0.00s)
-// === RUN   TestModifyDir
-// --- PASS: TestModifyDir (0.09s)
-
-func TestModify(t *testing.T) {
-	testCases := []string{
-		"testdst/4",
-		"testdst/4/5",
-		"testdst/4/6",
+func Test_compareFile(t *testing.T) {
+	tests := []struct {
+		name string
+		want bool
+	}{
+		// TODO: Add test cases.
 	}
-	asst := assert.New(t)
-	for testCaseIndex, testCase := range testCases {
-		// Feasibility test
-		err := modify(testCase, USER_NAME, GROUP_NAME, FILE_MODE)
-		asst.Nil(err, fmt.Sprintf(
-			"createDir failed - testCase%2d:%v", testCaseIndex, err))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := compareFile(); got != tt.want {
+				t.Errorf("compareFile() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 
-func TestUnTarWithGzip(t *testing.T) {
-	type testCaseTemplate struct {
+func Test_modify(t *testing.T) {
+	type args struct {
+		dirPath   string
+		userName  string
+		groupName string
+		fileMode  uint32
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := modify(tt.args.dirPath, tt.args.userName, tt.args.groupName, tt.args.fileMode); (err != nil) != tt.wantErr {
+				t.Errorf("modify() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func Test_createDirWithDetail(t *testing.T) {
+	type args struct {
+		dirPath   string
+		userName  string
+		groupName string
+		fileMode  uint32
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := createDirWithDetail(tt.args.dirPath, tt.args.userName, tt.args.groupName, tt.args.fileMode); (err != nil) != tt.wantErr {
+				t.Errorf("createDirWithDetail() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func Test_unTarWithGzip(t *testing.T) {
+	type args struct {
 		srcFile string
 		dstPath string
 	}
-	testCases := []testCaseTemplate{
-		{
-			srcFile: "testsrc/1.tar.gz",
-			dstPath: "testdst",
-		},
-		{
-			srcFile: "testsrc/2.tar.gz",
-			dstPath: "testdst",
-		},
-		{
-			srcFile: "testsrc/3.tar.gz",
-			dstPath: "testdst",
-		},
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
 	}
-	asst := assert.New(t)
-	for testCaseIndex, testCase := range testCases {
-		// Feasibility test
-		err := unTarWithGzip(
-			testCase.srcFile,
-			testCase.dstPath,
-		)
-		asst.Nil(err, fmt.Sprintf(
-			"unTar failed - testCase%2d:%v", testCaseIndex, err))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := unTarWithGzip(tt.args.srcFile, tt.args.dstPath); (err != nil) != tt.wantErr {
+				t.Errorf("unTarWithGzip() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }
 
-func TestCreateDirWithDetail(t *testing.T) {
-	testCases := []string{
-		"testdst/4/7",
-		"testdst/4/7/8",
+func Test_extractSqlFile(t *testing.T) {
+	type args struct {
+		srcSqlFile string
+		dstSqlPath string
 	}
-	asst := assert.New(t)
-	for testCaseIndex, testCase := range testCases {
-		// Feasibility test
-		err := createDirWithDetail(testCase, USER_NAME, GROUP_NAME, FILE_MODE)
-		asst.Nil(err, fmt.Sprintf(
-			"createDir failed - testCase%2d:%v", testCaseIndex, err))
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := extractSqlFile(tt.args.srcSqlFile, tt.args.dstSqlPath); (err != nil) != tt.wantErr {
+				t.Errorf("extractSqlFile() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }
 
-func TestExtractSqlFile(t *testing.T) {}
-
-func TestMoveCnfFile(t *testing.T) {}
+func Test_moveCnfFile(t *testing.T) {
+	type args struct {
+		srcCnfFile string
+		dstCnfFile string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := moveCnfFile(tt.args.srcCnfFile, tt.args.dstCnfFile); (err != nil) != tt.wantErr {
+				t.Errorf("moveCnfFile() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
