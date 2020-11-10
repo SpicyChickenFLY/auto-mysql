@@ -4,21 +4,21 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/SpicyChickenFLY/auto-mysql/installer"
 	"github.com/romberli/log"
-	"spicychicken.top/auto-mysql/installer"
 )
 
 const (
-	LOG_FILE_NAME = "/home/chow/run.log"
+	LOG_FILE_NAME = "/tmp/run.log"
 	// LOG_LEVEL         = "info"
 	// LOG_FORMAT        = "TEXT"
 	// LOG_FILE_MAX_SIZE = 100 // unit:MB
 	// LOG_EXPIRED_DAY   = 7
 	// LOG_MAX_BACKUPS   = 5
 
-	SRC_SQL_FILE = "./src/mysql/mysql.tar.gz"
+	SRC_SQL_FILE = "./static/mysql/mysql.tar.gz"
 	DST_SQL_PATH = "/home/chow/Softs/mysql"
-	SRC_CNF_FILE = "./src/conf/my.cnf"
+	SRC_CNF_FILE = "./static/conf/my.cnf"
 	DST_CNF_FILE = "/etc/my.cnf"
 )
 

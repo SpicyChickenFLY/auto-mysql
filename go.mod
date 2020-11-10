@@ -1,4 +1,4 @@
-module spicychicken.top/auto-mysql
+module github.com/SpicyChickenFLY/auto-mysql
 
 go 1.15
 
