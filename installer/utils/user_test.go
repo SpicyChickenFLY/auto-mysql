@@ -1,4 +1,4 @@
-package installer
+package utils
 
 import (
 	"os/user"
@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func Test_createUserWithGroup(t *testing.T) {
+func TestCreateUserWithGroup(t *testing.T) {
 	type args struct {
 		userName  string
 		groupName string
@@ -20,14 +20,14 @@ func Test_createUserWithGroup(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := createUserWithGroup(tt.args.userName, tt.args.groupName); (err != nil) != tt.wantErr {
-				t.Errorf("createUserWithGroup() error = %v, wantErr %v", err, tt.wantErr)
+			if err := CreateUserWithGroup(tt.args.userName, tt.args.groupName); (err != nil) != tt.wantErr {
+				t.Errorf("CreateUserWithGroup() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 
-func Test_modifyPwdForUser(t *testing.T) {
+func TestModifyPwdForUser(t *testing.T) {
 	type args struct {
 		userName string
 		usePwd   string
@@ -41,8 +41,8 @@ func Test_modifyPwdForUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := modifyPwdForUser(tt.args.userName, tt.args.usePwd); (err != nil) != tt.wantErr {
-				t.Errorf("modifyPwdForUser() error = %v, wantErr %v", err, tt.wantErr)
+			if err := ModifyPwdForUser(tt.args.userName, tt.args.usePwd); (err != nil) != tt.wantErr {
+				t.Errorf("ModifyPwdForUser() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

@@ -33,15 +33,15 @@ func main() {
 
 	log.Info("=============================")
 	log.Info("Program Started")
-	fmt.Println("============================")
+	fmt.Println("\n============================")
 	fmt.Println("MySQL Automatic Installation")
 	fmt.Print("============================\n\n")
 
 	// Custom parameters
-	installMode := flag.String("m", "install", "install/remove/test")
-	srcSqlFile := flag.String(
+	runMode := flag.String("m", "multi", "single/multi/remove/test")
+	srcSQLFile := flag.String(
 		"s", SRC_SQL_FILE, "postion of mysql-binary file")
-	dstSqlPath := flag.String(
+	dstSQLPath := flag.String(
 		"d", DST_SQL_PATH, "position for installation")
 	srcCnfFile := flag.String(
 		"c", SRC_CNF_FILE, "postion of you configure file")
@@ -51,22 +51,31 @@ func main() {
 	flag.Parse()
 
 	log.Info("Custom parameters:")
-	log.Info(fmt.Sprintf("srcSqlFile: %s", *srcSqlFile))
-	log.Info(fmt.Sprintf("dstSqlPath: %s", *dstSqlPath))
+	log.Info(fmt.Sprintf("srcSQLFile: %s", *srcSQLFile))
+	log.Info(fmt.Sprintf("dstSQLPath: %s", *dstSQLPath))
 	log.Info(fmt.Sprintf("srcCnfFile: %s", *srcCnfFile))
+	log.Info(fmt.Sprintf("RunMode: %s", *runMode))
 
 	fmt.Println("Please check your input parameter:")
-	fmt.Printf("srcSqlFile: %s\n", *srcSqlFile)
-	fmt.Printf("dstSqlPath: %s\n", *dstSqlPath)
+	fmt.Printf("srcSQLFile: %s\n", *srcSQLFile)
+	fmt.Printf("dstSQLPath: %s\n", *dstSQLPath)
 	fmt.Printf("srcCnfFile: %s\n\n", *srcCnfFile)
+	fmt.Printf("RunMode: %s\n\n", *runMode)
 
 	// Analyze the installMode
-	if *installMode == "install" {
-		installer.Install(
-			*srcSqlFile, *dstSqlPath,
+	switch *runMode {
+	case "single":
+		installer.InstallSingleInstance(
+			*srcSQLFile, *dstSQLPath,
 			*srcCnfFile, dstCnfFile)
-	} else {
+	case "multi":
+		installer.InstallMultiInstance(
+			*srcSQLFile, *dstSQLPath,
+			*srcCnfFile, dstCnfFile)
+	case "remove":
 		installer.Remove()
+	case "test":
+		// TestCreateConnBySock()
 	}
-
+	fmt.Print("============================\n\n")
 }

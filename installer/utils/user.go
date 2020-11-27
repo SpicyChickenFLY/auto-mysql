@@ -1,22 +1,24 @@
-package installer
+package utils
 
 import (
+	"fmt"
 	"io"
 	"os/exec"
 	"os/user"
 
-	"github.com/SpicyChickenFLY/auto-mysql/installer/shell"
 	"github.com/romberli/log"
 )
 
 // Warning: Do NOT create passwd for user "mysql"!!!
 
-// createUserWithGroup is a func for installer to create group&user
-func createUserWithGroup(userName string, groupName string) error {
+// CreateUserWithGroup is a func for installer to create group&user
+func CreateUserWithGroup(userName, groupName string) error {
+	log.Info(fmt.Sprintf("CreateUserWithGroup(%s,%s)",
+		userName, groupName))
 	if _, ok := findGroup(groupName); ok {
 		log.Warn("Group already exists!")
 	} else {
-		if err := shell.Groupadd(groupName); err != nil {
+		if err := Groupadd(groupName); err != nil {
 			return err
 		}
 	}
@@ -24,7 +26,7 @@ func createUserWithGroup(userName string, groupName string) error {
 	if _, ok := findUser(userName); ok {
 		log.Warn("User already exists!")
 	} else {
-		if err := shell.UseraddWithGroup(groupName, userName); err != nil {
+		if err := UseraddWithGroup(groupName, userName); err != nil {
 			return err
 		}
 	}
@@ -33,7 +35,7 @@ func createUserWithGroup(userName string, groupName string) error {
 }
 
 // FIXME: This function is not used for now
-func modifyPwdForUser(userName string, usePwd string) error {
+func ModifyPwdForUser(userName string, usePwd string) error {
 	if _, ok := findUser(userName); ok {
 		return nil
 	}

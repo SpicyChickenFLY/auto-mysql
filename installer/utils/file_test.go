@@ -1,4 +1,4 @@
-package installer
+package utils
 
 import "testing"
 
@@ -85,10 +85,13 @@ func Test_unTarWithGzip(t *testing.T) {
 	}
 }
 
-func Test_extractSqlFile(t *testing.T) {
+func TestExtractSQLFile(t *testing.T) {
 	type args struct {
-		srcSqlFile string
-		dstSqlPath string
+		srcSQLFile string
+		dstSQLPath string
+		userName   string
+		groupName  string
+		fileMode   uint32
 	}
 	tests := []struct {
 		name    string
@@ -99,17 +102,20 @@ func Test_extractSqlFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := extractSqlFile(tt.args.srcSqlFile, tt.args.dstSqlPath); (err != nil) != tt.wantErr {
-				t.Errorf("extractSqlFile() error = %v, wantErr %v", err, tt.wantErr)
+			if err := ExtractSQLFile(tt.args.srcSQLFile, tt.args.dstSQLPath, tt.args.userName, tt.args.groupName, tt.args.fileMode); (err != nil) != tt.wantErr {
+				t.Errorf("ExtractSQLFile() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 
-func Test_moveCnfFile(t *testing.T) {
+func TestMoveCnfFile(t *testing.T) {
 	type args struct {
 		srcCnfFile string
 		dstCnfFile string
+		userName   string
+		groupName  string
+		fileMode   uint32
 	}
 	tests := []struct {
 		name    string
@@ -120,8 +126,55 @@ func Test_moveCnfFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := moveCnfFile(tt.args.srcCnfFile, tt.args.dstCnfFile); (err != nil) != tt.wantErr {
-				t.Errorf("moveCnfFile() error = %v, wantErr %v", err, tt.wantErr)
+			if err := MoveCnfFile(tt.args.srcCnfFile, tt.args.dstCnfFile, tt.args.userName, tt.args.groupName, tt.args.fileMode); (err != nil) != tt.wantErr {
+				t.Errorf("MoveCnfFile() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestMoveDaemonFile(t *testing.T) {
+	type args struct {
+		dstSQLPath    string
+		srcDaemonFile string
+		dstDaemonFile string
+		fileMode      uint32
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := MoveDaemonFile(tt.args.dstSQLPath, tt.args.srcDaemonFile, tt.args.dstDaemonFile, tt.args.fileMode); (err != nil) != tt.wantErr {
+				t.Errorf("MoveDaemonFile() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestCopyDataDir(t *testing.T) {
+	type args struct {
+		userName    string
+		groupName   string
+		srcDirPath  string
+		dstDirPaths []string
+		autoCnfName string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := CopyDataDir(tt.args.userName, tt.args.groupName, tt.args.srcDirPath, tt.args.dstDirPaths, tt.args.autoCnfName); (err != nil) != tt.wantErr {
+				t.Errorf("CopyDataDir() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

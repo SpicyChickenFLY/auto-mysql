@@ -6,9 +6,10 @@ This Project is use to automate MySQL Initializing Procedure by GOLANG
 
 ## Usage
 ``` bash
-# SRC_FILE_FOLDER is where you put your mysql and configure file 
+# SRC_SQL_FILE_FOLDER is where you put your mysql
 # DST_FILE_FOLDER is where you want to install the mysql
-user@host:~/$ automysql [ -m [true/false] -s <SRC_SQL_FILE>, -d <DST_SQL_PATH>, -c <SRC_CNF_FILE> ]
+# SRC_CNF_FILE_FOLDER is your configure file 
+user@host:~/$ automysql [ -m [single/multi] -s <SRC_SQL_FILE>, -d <DST_SQL_PATH>, -c <SRC_CNF_FILE> ]
 ```
 
 Default value as follow
@@ -20,7 +21,7 @@ SRC_CNF_FILE = "./src/my.cnf"
 DST_CNF_FILE = "/etc/my.cnf" # This value could not be modified by now!
 ```
 
-After program finished, you should set a password for root in MySQL(Which will be automated in next version).
+After program finished, you should set a password for root in MySQL (We have already set it to 123).
 
 ```bash
 update mysql.user set authentication_string=password('123') 
@@ -39,18 +40,25 @@ update mysql.user set authentication_string=password('123')
 
 ## Program Interface
 
-User Interface
+User Interface for single instance
 
-![](src/1.png)
+![](static/imgs/1.png)
 
-Running Log
+Running Log for single instance
 
-![](src/2.png)
+![](static/imgs/2.png)
+
+User Interface for multiple instance
+
+![](static/imgs/3.png)
+
+Running Log for multiple instance
+
+![](static/imgs/4.png)
 
 
 ## Further Work
 
-1. Reconstruct shell command call
 2. Deeper custom for user
 3. Detailed module test
 4. analyze OS and install dependency
@@ -63,10 +71,6 @@ Running Log
 
 省点打cd,chown,mv指令的时间
 
-2.为啥初始化完的实例root没有密码？
-
-因为目前使用的--initialize-insecure，这个问题下一个版本就会改掉，目前没时间
-
-3.有什么潜在的问题？
+2.有什么潜在的问题？
 
 如果你把mysql装在奇奇怪怪的路径上（不保证当前用户可达的那种），初始化不一定能成功

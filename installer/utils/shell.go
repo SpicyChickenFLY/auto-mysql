@@ -1,4 +1,4 @@
-package shell
+package utils
 
 import (
 	"bytes"
@@ -8,15 +8,20 @@ import (
 	"github.com/romberli/log"
 )
 
-var out bytes.Buffer
+var stdout bytes.Buffer
 var stderr bytes.Buffer
 
 // ExecCommand is a func for go to call shell command
 // TODO: let user decide if he/she need sudoer premission
 func ExecCommand(cmdStr string) error {
+	// fmt.Println(cmdStr)
 	// sudo mv srcFile dstFile
 	cmd := exec.Command("/bin/sh", "-c", cmdStr)
-	cmd.Stdout = &out
+	cmd.Stdout = &stdout
+	if stdout.String() != "" {
+		fmt.Printf("cmd-[%s]%s\n", cmdStr, stdout.String())
+		log.Infof("cmd-[%s]%s\n", cmdStr, stdout.String())
+	}
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		log.Warnf("cmd-[%s]%s:%s\n",
@@ -39,7 +44,14 @@ func Mv(srcFile, dstFile string) error {
 func Cp(srcFile, dstFile string) error {
 	// sudo cp -r srcFile dstFile
 	return ExecCommand(
-		fmt.Sprintf("sudo cp -r %s %s", srcFile, dstFile))
+		fmt.Sprintf("sudo cp -rf %s %s", srcFile, dstFile))
+}
+
+// Rm is a shell command for deleteng file
+func Rm(dstFile string) error {
+	// sudo rm -rf dstFile
+	return ExecCommand(
+		fmt.Sprintf("sudo rm -rf %s", dstFile))
 }
 
 // Chown is a shell command for changing owner of dir/file
@@ -70,7 +82,7 @@ func Mkdir(dirPath string) error {
 func Tar(srcFile string, dstPath string) error {
 	// tar -zxvf srcFile -C dstPath
 	return ExecCommand(
-		fmt.Sprintf("sudo tar -zxvf %s -C %s ", srcFile, dstPath))
+		fmt.Sprintf("sudo tar -zxf %s -C %s ", srcFile, dstPath))
 }
 
 // Useradd is a shell command for adding user in linux
