@@ -20,3 +20,5 @@ test*/
 
 #
 *.tar.gz
+
+static/mysql/*

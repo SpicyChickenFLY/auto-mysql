@@ -5,26 +5,28 @@ import (
 	"fmt"
 
 	"github.com/SpicyChickenFLY/auto-mysql/installer"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/romberli/log"
 )
 
 const (
-	LOG_FILE_NAME = "/tmp/run.log"
+	logFileName = "/tmp/run.log"
 	// LOG_LEVEL         = "info"
 	// LOG_FORMAT        = "TEXT"
 	// LOG_FILE_MAX_SIZE = 100 // unit:MB
 	// LOG_EXPIRED_DAY   = 7
 	// LOG_MAX_BACKUPS   = 5
 
-	SRC_SQL_FILE = "./static/mysql/mysql.tar.gz"
-	DST_SQL_PATH = "/home/chow/Softs/mysql"
-	SRC_CNF_FILE = "./static/conf/my.cnf"
-	DST_CNF_FILE = "/etc/my.cnf"
+	srcSQLFileDef   = "./static/mysql/mysql.tar.gz"
+	dstSQLPathDef   = "/home/chow/Softs/mysql"
+	srcCnfFileDef   = "./static/conf/my.cnf"
+	servInstInfoDef = "root:123@localhost:3306|3307"
+	mysqlPwdDef     = "123456"
 )
 
 func main() {
 	// 初始化全局变量
-	_, _, err := log.InitLoggerWithDefaultConfig(LOG_FILE_NAME)
+	_, _, err := log.InitLoggerWithDefaultConfig(logFileName)
 	if err != nil {
 		fmt.Printf("Init logger failed: %s\n", err.Error())
 		panic(err)
@@ -38,44 +40,45 @@ func main() {
 	fmt.Print("============================\n\n")
 
 	// Custom parameters
-	runMode := flag.String("m", "multi", "single/multi/remove/test")
+	runMode := flag.String("m", "standard", "single/multi/standard/remove/test")
 	srcSQLFile := flag.String(
-		"s", SRC_SQL_FILE, "postion of mysql-binary file")
+		"s", srcSQLFileDef, "postion of mysql-binary file")
 	dstSQLPath := flag.String(
-		"d", DST_SQL_PATH, "position for installation")
+		"d", dstSQLPathDef, "position for installation")
 	srcCnfFile := flag.String(
-		"c", SRC_CNF_FILE, "postion of you configure file")
+		"c", srcCnfFileDef, "postion of you configure file")
+	servInstInfo := flag.String(
+		"i", servInstInfoDef,
+		"information of instance - userName:userPwd@host:port#port1|port2|port3;userName:...")
+	mysqlPwd := flag.String(
+		"p", mysqlPwdDef, "password for mysql user root")
 
-	// Fixed parameters
-	dstCnfFile := DST_CNF_FILE
 	flag.Parse()
 
 	log.Info("Custom parameters:")
 	log.Info(fmt.Sprintf("srcSQLFile: %s", *srcSQLFile))
 	log.Info(fmt.Sprintf("dstSQLPath: %s", *dstSQLPath))
 	log.Info(fmt.Sprintf("srcCnfFile: %s", *srcCnfFile))
+	log.Info(fmt.Sprintf("mysqlPwd: %s", *mysqlPwd))
 	log.Info(fmt.Sprintf("RunMode: %s", *runMode))
 
 	fmt.Println("Please check your input parameter:")
 	fmt.Printf("srcSQLFile: %s\n", *srcSQLFile)
 	fmt.Printf("dstSQLPath: %s\n", *dstSQLPath)
-	fmt.Printf("srcCnfFile: %s\n\n", *srcCnfFile)
+	fmt.Printf("srcCnfFile: %s\n", *srcCnfFile)
+	fmt.Printf("mysqlPwd: %s\n\n", *mysqlPwd)
 	fmt.Printf("RunMode: %s\n\n", *runMode)
 
 	// Analyze the installMode
 	switch *runMode {
-	case "single":
-		installer.InstallSingleInstance(
-			*srcSQLFile, *dstSQLPath,
-			*srcCnfFile, dstCnfFile)
-	case "multi":
-		installer.InstallMultiInstance(
-			*srcSQLFile, *dstSQLPath,
-			*srcCnfFile, dstCnfFile)
-	case "remove":
-		installer.Remove()
-	case "test":
-		// TestCreateConnBySock()
+	// case "single":
+	// 	installer.InstallCustomSingleInstance(
+	// 		*srcSQLFile, *dstSQLPath, *srcCnfFile, *mysqlPwd)
+	// case "multi":
+	// 	installer.InstallCustomMultiInstance(
+	// 		*srcSQLFile, *dstSQLPath, *srcCnfFile, *mysqlPwd)
+	case "standard":
+		installer.InstallStandardMultiInstanceOnMultiServer(*srcSQLFile, *servInstInfo, *mysqlPwd)
 	}
 	fmt.Print("============================\n\n")
 }
