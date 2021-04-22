@@ -1,17 +1,24 @@
 package mysql
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
+	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/db"
 	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/linux"
 	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/progress"
 )
 
 const (
-	mysqlInitUserPwd  = ""
-	mysqlGenUserPwd   = "123456"
-	allowRemoteAccess = `mysql -uroot -S %s -e "grant all privileges  on *.* to root@'%%' identified by '%s' WITH GRANT OPTION;flush privileges;"`
+	mysqlAdminUserName   = `admin`
+	mysqlAdminPermission = "SHUTDOWN"
+	mysqlAdminScope      = db.MySQLAllScope
+
+	mysqlReplicaHost       = db.MySQLLocalHost
+	mysqlReplicaUserName   = "replication"
+	mysqlReplicaPermission = "replication slave, replication client"
+	mysqlReplicaScope      = db.MySQLAllScope
 )
 
 // CreateReplicaRelation create Master/Slaves for instances
@@ -61,16 +68,16 @@ func testReplication(
 	slaveServInstInfos []*ServerInstanceInfo,
 	newPwd string) error {
 	// Connect to Instance [Master]
-	db, err := CreateConn(
+	conn, err := db.CreateConn(
 		masterServInstInfo.ServerInfo.Host,
 		masterServInstInfo.InstInfos[0].Port,
 		mysqlGenUserPwd)
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	defer conn.Close()
 	// Create test data
-	if err := CreateTestData(db); err != nil {
+	if err := CreateTestData(conn); err != nil {
 		return err
 	}
 
@@ -79,16 +86,16 @@ func testReplication(
 	for _, slaveServInstInfo := range slaveServInstInfos {
 		for _, slaveInstInfo := range slaveServInstInfo.InstInfos {
 			// Connect to Instance [Slave]
-			db, err := CreateConn(
+			conn, err := db.CreateConn(
 				slaveServInstInfo.ServerInfo.Host,
 				slaveInstInfo.Port,
 				mysqlGenUserPwd)
 			if err != nil {
 				return err
 			}
-			defer db.Close()
+			defer conn.Close()
 			// Retrive test data
-			if err := RetriveTestData(db); err != nil {
+			if err := RetriveTestData(conn); err != nil {
 				return err
 			}
 		}
@@ -130,7 +137,7 @@ func setupMasterInst(
 		return err
 	}
 	// Connect to Instance [Master]
-	db, err := CreateConn(
+	conn, err := db.CreateConn(
 		masterServInst.ServerInfo.Host,
 		masterServInst.InstInfos[0].Port,
 		generalPwd)
@@ -142,22 +149,22 @@ func setupMasterInst(
 	}
 	// Grant admin user [Master]
 	if err := progress.Check("Grant admin user [Master]",
-		CreateAdminUser(db, generalPwd)); err != nil {
+		CreateAdminUser(conn, generalPwd)); err != nil {
 		return err
 	}
 	// Grant replica user [Master]
 	if err := progress.Check("Grant replica user [Master]",
-		CreateReplicaUser(db, generalPwd)); err != nil {
+		CreateReplicaUser(conn, generalPwd)); err != nil {
 		return err
 	}
 	// Create test data [Master]
 	if err := progress.Check("Create test data [Master]",
-		CreateTestEnv(db)); err != nil {
+		CreateTestEnv(conn)); err != nil {
 		return err
 	}
 	// Close Connection to instance [Master]
 	return progress.Check("Close Connection to instance [Master]",
-		db.Close())
+		conn.Close())
 }
 
 // setupSlaveInst is a func to setup for Slave
@@ -198,7 +205,7 @@ func setupSlaveInst(
 				return err
 			}
 			// Connect to Slave instance
-			db, err := CreateConn(
+			conn, err := db.CreateConn(
 				slaveServInst.ServerInfo.Host, slaveInst.Port, mysqlGenUserPwd)
 			if err := progress.Check("Connect to Slave Instance", err); err != nil {
 				return err
@@ -206,7 +213,7 @@ func setupSlaveInst(
 			// Change Master for slave instance
 			if err := progress.Check("Change Master for slave instance",
 				ChangeMaster(
-					db,
+					conn,
 					masterServInst.ServerInfo.Host,
 					masterServInst.InstInfos[0].Port,
 					generalPwd)); err != nil {
@@ -214,12 +221,12 @@ func setupSlaveInst(
 			}
 			// Start Slave Replication
 			if err := progress.Check("Start Slave Replication",
-				StartSlave(db)); err != nil {
+				StartSlave(conn)); err != nil {
 				return err
 			}
 			// Close Connection to instance [Slave]
 			if err := progress.Check("Close Connection to instance [Slave]",
-				db.Close()); err != nil {
+				conn.Close()); err != nil {
 				return err
 			}
 		}
@@ -249,4 +256,46 @@ func sperateMasterSlaveInstance(
 			HasMater:   false}
 	}
 	return masterServInst, slaveServInsts
+}
+
+// CreateAdminUser create a mysql user: admin
+func CreateAdminUser(
+	conn *sql.DB,
+	passwd string) error {
+	mysqlAdminUser := fmt.Sprintf(
+		"'%s'@'%s'", mysqlAdminUserName, db.MySQLLocalHost)
+	return db.GrantUser(conn,
+		mysqlAdminPermission, mysqlAdminScope, mysqlAdminUser, passwd)
+}
+
+// CreateReplicaUser create a mysql user: replication
+func CreateReplicaUser(
+	conn *sql.DB,
+	passwd string) error {
+	mysqlReplicaUser := fmt.Sprintf(
+		"'%s'@'%s'", mysqlReplicaUserName, db.MySQLAllHost)
+	return db.GrantUser(conn,
+		mysqlReplicaPermission, mysqlReplicaScope, mysqlReplicaUser, passwd)
+}
+
+// ChangeMaster is a func to change master of slave instance
+func ChangeMaster(
+	conn *sql.DB,
+	masterHost string, masterPort int, masterPwd string) error {
+	sqlStmt := fmt.Sprintf(
+		`CHANGE MASTER TO 
+			master_host='%s', 
+			master_port=%d,
+			master_user='%s',
+			master_password='%s',
+			master_auto_position=1;`,
+		mysqlReplicaHost, masterPort, mysqlReplicaUserName, masterPwd)
+	_, err := conn.Exec(sqlStmt)
+	return err
+}
+
+// StartSlave is a func to start replication
+func StartSlave(conn *sql.DB) error {
+	_, err := conn.Exec("start slave;")
+	return err
 }

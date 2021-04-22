@@ -5,16 +5,8 @@ import (
 	"path"
 	"time"
 
+	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/db"
 	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/linux"
-)
-
-const (
-	linuxUserMysql      = "mysql"
-	daemonFileRel       = "bin/mysqld"
-	supportPathRel      = "support"
-	singleServerFileRel = "support-files/mysql.server"
-	multiServerFileRel  = "bin/mysqld_multi"
-	daemonPathRel       = "bin"
 )
 
 const (
@@ -98,12 +90,12 @@ func StopMultiInst(servInstInfo *ServerInstanceInfo) error {
 func ModifyPwdForAllInstOfServer(
 	servInstInfo *ServerInstanceInfo, port []int, prevPwd, newPwd string) error {
 	for _, instInfo := range servInstInfo.InstInfos {
-		db, err := CreateConn(servInstInfo.ServerInfo.Host, instInfo.Port, prevPwd)
+		conn, err := db.CreateConn(servInstInfo.ServerInfo.Host, instInfo.Port, prevPwd)
 		if err != nil {
 			return err
 		}
-		defer db.Close()
-		if err := ModifyMysqlPwd(db, newPwd); err != nil {
+		defer conn.Close()
+		if err := db.ModifyMysqlPwd(conn, newPwd); err != nil {
 			return err
 		}
 	}

@@ -29,27 +29,6 @@ const (
 	portKey = "port"
 )
 
-const (
-	rootPath = "/"
-
-	stdCnfTemplateGeneral  = "./static/conf/template_gen.cnf"
-	stdCnfTemplateInstance = "./static/conf/template_inst.cnf"
-	srcCnfFileDef          = "./static/conf/my.cnf"
-
-	stdSectionClient = "client"
-
-	stdSectionMysqlDaemonMulti   = "mysqld_multi"
-	stdSectionMysqlServerGeneral = "mysqld"
-
-	stdBaseDir         = "/usr/local/mysql"
-	stdDataDir         = "/mysqldata/mysql%d/data"
-	stdErrorLogFileDir = "/mysqldata/mysql%d/log/mysqld.log"
-	stdSockFileDir     = "/mysqldata/mysql%d/mysql.sock"
-
-	templateSectionName     = "template"
-	templatePortPlaceHolder = "[port]"
-)
-
 // CheckRquireDirExists make sure all dir exists
 func CheckRquireDirExists(
 	servInstInfo *ServerInstanceInfo, srcCnfFile string) error {
@@ -110,9 +89,6 @@ func CheckRquireDirExists(
 					dirPath := string([]byte(filePath)[:index])
 					dirList += " " + dirPath
 				}
-				// if keyName == multiLogFileKey {
-				// 	_, err := createFile(s *linux.ServerInfo, filePath string)
-				// }
 			}
 		}
 	}
@@ -123,14 +99,14 @@ func CheckRquireDirExists(
 // GenerateStdCnf generate Standard my.cnf(single/multi) for server
 func GenerateStdCnf(servInstInfo *ServerInstanceInfo) (string, error) {
 	if _, err := linux.ExecuteCommand(
-		servInstInfo.ServerInfo, linux.Rm(srcCnfFileDef)); err != nil {
+		servInstInfo.ServerInfo, linux.Rm(stdSrcCnfFileDef)); err != nil {
 		return "", err
 	}
 	servInstInfo.BaseDir = stdBaseDir
 	cfgGen, err := ini.LoadSources(ini.LoadOptions{
 		AllowBooleanKeys: true,
 		// UnescapeValueDoublQueotes: true,
-	}, stdCnfTemplateGeneral)
+	}, stdSrcCnfTemplateGeneral)
 	if err != nil {
 		return "", err
 	}
@@ -149,13 +125,13 @@ func GenerateStdCnf(servInstInfo *ServerInstanceInfo) (string, error) {
 			templatePortPlaceHolder,
 			fmt.Sprint(servInstInfo.InstInfos[0].Port))
 	}
-	cfgGen.SaveTo(srcCnfFileDef)
+	cfgGen.SaveTo(stdSrcCnfFileDef)
 
-	bytes, err := ioutil.ReadFile(stdCnfTemplateInstance)
+	bytes, err := ioutil.ReadFile(stdSrcCnfTemplateInstance)
 	if err != nil {
 		return "", err
 	}
-	fw, err := os.OpenFile(srcCnfFileDef, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	fw, err := os.OpenFile(stdSrcCnfFileDef, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	defer fw.Close()
 	OriginalStr := string(bytes)
 	for i := 0; i < len(servInstInfo.InstInfos); i++ {
@@ -185,16 +161,12 @@ func GenerateStdCnf(servInstInfo *ServerInstanceInfo) (string, error) {
 			return "", err
 		}
 	}
-	return srcCnfFileDef, nil
+	return stdSrcCnfFileDef, nil
 }
 
 func replaceAllValueInSection(
 	sec *ini.Section, placeHolder, replaceStr string) {
 	for _, key := range sec.Keys() {
-
-		key.SetValue(
-			strings.Replace(
-				key.Value(), placeHolder, replaceStr, -1))
-
+		key.SetValue(strings.Replace(key.Value(), placeHolder, replaceStr, -1))
 	}
 }

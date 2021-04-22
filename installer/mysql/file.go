@@ -8,16 +8,6 @@ import (
 	"github.com/lingdor/stackerror"
 )
 
-const (
-	allFile         = "*"
-	dstCnfPathDef   = "/etc"
-	dstCnfFileDef   = "/etc/my.cnf"
-	autoCnfFileName = "auto.cnf"
-	tmpSQLPath      = "/tmp/mysql"
-	tmpSQLFile      = "mysql.tar.gz"
-	usrBinPath      = "/usr/bin"
-)
-
 // modify is a func for changing mode and owner for file/dir
 func modifyDataDir(s *linux.ServerInfo, dirPath string, mode uint32) error {
 	if _, err := linux.ExecuteCommand(
@@ -82,21 +72,11 @@ func ExtractSoftware(
 	if _, err := os.Stat(srcSQLFile); err != nil {
 		return stackerror.New("Software not exists")
 	}
-	// Move mysql file to dstSQLPath
-	if err := linux.CopyDirOrFileBetweenServers(
-		linux.LocalHost, s,
-		srcSQLFile, path.Join(dstSQLPath, tmpSQLFile)); err != nil {
+	if err := linux.Unarchive(s, srcSQLFile, dstSQLPath, 1); err != nil {
 		return err
 	}
-	if err := unTarWithGzip(
-		s,
-		path.Join(dstSQLPath, tmpSQLFile), dstSQLPath); err != nil {
-		return err
-	}
-	if err := linux.MoveDirOrFileOnServer(
-		s, path.Join(dstSQLPath, "mysql-*", allFile), dstSQLPath); err != nil {
-		return err
-	}
+	// FIXME: DO NOT copy these file to /usr/bin
+	// TODO: Just export them to path
 	if err := linux.CopyDirOrFileBetweenServers(
 		s, s, path.Join(dstSQLPath, daemonPathRel, allFile), usrBinPath); err != nil {
 		return err
@@ -111,7 +91,7 @@ func MoveCnfFile(
 	s *linux.ServerInfo,
 	srcCnfFile string) error {
 	if err := linux.CopyDirOrFileBetweenServers(
-		linux.LocalHost, s, srcCnfFile, dstCnfPathDef); err != nil {
+		linux.LocalHost, s, srcCnfFile, stdDstCnfPath); err != nil {
 		return err
 	}
 	return modifyDataDir(s, dstCnfFileDef, cnfFileMode)

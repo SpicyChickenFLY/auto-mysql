@@ -14,13 +14,11 @@ func CreateUserWithGroup(s *ServerInfo, userName, groupName string) error {
 			return err
 		}
 	}
-
 	if output, err := ExecuteCommand(
 		s, UseraddWithGroup(groupName, userName)); err != nil {
 		if !strings.Contains(output, "already exists") {
 			return err
 		}
 	}
-
 	return nil
 }
