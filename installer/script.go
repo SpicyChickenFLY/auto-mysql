@@ -18,8 +18,9 @@ const ()
 //	3. Move configure file
 //	4. Create data directory
 func prepare(
-	servInstInfo *mysql.ServerInstanceInfo, srcSQLFile,
-	srcCnfFile string) error {
+	useSrcFile bool,
+	servInstInfo *mysql.ServerInstanceInfo,
+	srcSQLFile, srcCnfFile string) error {
 	//
 	if err := progress.Check("Install Dependencies",
 		mysql.PrepareMysqlCentos(servInstInfo)); err != nil {
@@ -45,13 +46,15 @@ func prepare(
 		mysql.CheckRquireDirExists(servInstInfo, srcCnfFile)); err != nil {
 		return err
 	}
-	// Decompress the archive
-	return progress.Check("Decompress the archive",
-		mysql.ExtractSoftware(
-			servInstInfo.ServerInfo,
-			srcSQLFile,
-			servInstInfo.BaseDir))
-
+	// Decompress the archive if srcSQLFile exists
+	if useSrcFile {
+		return progress.Check("Decompress the archive",
+			mysql.ExtractSoftware(
+				servInstInfo.ServerInfo,
+				srcSQLFile,
+				servInstInfo.BaseDir))
+	}
+	return nil
 }
 
 // InstallCustomInstance install MySQL single instance
@@ -60,11 +63,12 @@ func prepare(
 //	1. Prepare for environment for Installation
 //	2. Initialize MySQL(without password)
 func InstallCustomInstance(
+	useSrcFile bool,
 	servInstInfo *mysql.ServerInstanceInfo,
 	srcSQLFile, srcCnfFile string) error {
 	// Prepare for environment
 	if err := prepare(
-		servInstInfo, srcSQLFile, srcCnfFile); err != nil {
+		useSrcFile, servInstInfo, srcSQLFile, srcCnfFile); err != nil {
 		return err
 	}
 	// Initialize MySQL(without password)
@@ -77,14 +81,14 @@ func InstallCustomInstance(
 	return progress.Check("Install Compelete", nil)
 }
 
-// InstallStandardMultiInstanceOnMultiServer is a func
+// InstallStandardMGRInstance is a func
 //	Procedure:
 //	1. Parse the server parameter
 //	2. Generate Cnf for each server
 //	2. Install instance on each server by parameter
 //	3. Create Master/Slave relationship
-func InstallStandardMultiInstanceOnMultiServer(
-	srcSQLFile, infoStr, mysqlPwd string) error {
+func InstallStandardMGRInstance(
+	useSrcFile bool, srcSQLFile, infoStr, mysqlPwd string) error {
 
 	// Parse the server parameter
 	allServInstInfos, err := mysql.ParseServerStr(infoStr)
@@ -102,7 +106,50 @@ func InstallStandardMultiInstanceOnMultiServer(
 		}
 		// Install instance on each server by parameter
 		if err := InstallCustomInstance(
-			servInstInfo, srcSQLFile, srcCnfFile); err != nil {
+			useSrcFile, servInstInfo, srcSQLFile, srcCnfFile); err != nil {
+			return err
+		}
+	}
+
+	fmt.Println("--- Creating MGR Relationship ---")
+	// Create MGR relationship
+	if len(allServInstInfos) > 1 || len(allServInstInfos[0].InstInfos) > 1 {
+		if err := progress.Check("Create MGR relationship",
+			mysql.CreateMGRRelation(
+				allServInstInfos, mysqlPwd)); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// InstallStandardReplicaIntance is a func
+//	Procedure:
+//	1. Parse the server parameter
+//	2. Generate Cnf for each server
+//	2. Install instance on each server by parameter
+//	3. Create Master/Slave relationship
+func InstallStandardReplicaIntance(
+	useSrcFile bool, srcSQLFile, infoStr, mysqlPwd string) error {
+
+	// Parse the server parameter
+	allServInstInfos, err := mysql.ParseServerStr(infoStr)
+	if progress.Check("Parse the server parameter", err) != nil {
+		return err
+	}
+
+	for _, servInstInfo := range allServInstInfos {
+		fmt.Printf("--- Server: %s:%d ---\n",
+			servInstInfo.ServerInfo.Host, servInstInfo.ServerInfo.Port)
+		// Generate Cnf for Server
+		srcCnfFile, err := mysql.GenerateStdCnf(servInstInfo)
+		if progress.Check("Generate Cnf for Server", err) != nil {
+			return err
+		}
+		// Install instance on each server by parameter
+		if err := InstallCustomInstance(
+			useSrcFile, servInstInfo, srcSQLFile, srcCnfFile); err != nil {
 			return err
 		}
 	}
@@ -111,7 +158,7 @@ func InstallStandardMultiInstanceOnMultiServer(
 	// Create Master/Slave relationship
 	if len(allServInstInfos) > 1 || len(allServInstInfos[0].InstInfos) > 1 {
 		if err := progress.Check("Create Master/Slave relationship",
-			mysql.CreateMasterSlaveRelation(
+			mysql.CreateReplicaRelation(
 				allServInstInfos, mysqlPwd)); err != nil {
 			return err
 		}

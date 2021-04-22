@@ -14,7 +14,7 @@ const (
 	allowRemoteAccess = `mysql -uroot -S %s -e "grant all privileges  on *.* to root@'%%' identified by '%s' WITH GRANT OPTION;flush privileges;"`
 )
 
-// CreateMasterSlaveRelation create Master/Slaves for instances
+// CreateReplicaRelation create Master/Slaves for instances
 //	Procedure
 //	1. Start instance [Master]
 //	2. Setup Master instance [Master]
@@ -22,7 +22,7 @@ const (
 //	4. Start instance [Master/Slave]
 //	5. Setup Slave instances [Slave]
 //	6. Test Replication
-func CreateMasterSlaveRelation(
+func CreateReplicaRelation(
 	allServInstInfos []*ServerInstanceInfo,
 	newPwd string) error {
 	masterServInst, slaveServInsts := sperateMasterSlaveInstance(allServInstInfos)

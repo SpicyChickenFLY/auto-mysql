@@ -40,7 +40,8 @@ func main() {
 	fmt.Print("============================\n\n")
 
 	// Custom parameters
-	runMode := flag.String("m", "standard", "single/multi/standard/remove/test")
+	runMode := flag.String("m", "mgr-s", "single/multi/standard/remove/test")
+	useSrcFile := flag.Bool("f", false, "true if need copy file")
 	srcSQLFile := flag.String(
 		"s", srcSQLFileDef, "postion of mysql-binary file")
 	dstSQLPath := flag.String(
@@ -56,6 +57,7 @@ func main() {
 	flag.Parse()
 
 	log.Info("Custom parameters:")
+	log.Info(fmt.Sprintf("useSrcFile: %t", *useSrcFile))
 	log.Info(fmt.Sprintf("srcSQLFile: %s", *srcSQLFile))
 	log.Info(fmt.Sprintf("dstSQLPath: %s", *dstSQLPath))
 	log.Info(fmt.Sprintf("srcCnfFile: %s", *srcCnfFile))
@@ -63,6 +65,7 @@ func main() {
 	log.Info(fmt.Sprintf("RunMode: %s", *runMode))
 
 	fmt.Println("Please check your input parameter:")
+	fmt.Printf("useSrcFile: %t\n", *useSrcFile)
 	fmt.Printf("srcSQLFile: %s\n", *srcSQLFile)
 	fmt.Printf("dstSQLPath: %s\n", *dstSQLPath)
 	fmt.Printf("srcCnfFile: %s\n", *srcCnfFile)
@@ -77,8 +80,10 @@ func main() {
 	// case "multi":
 	// 	installer.InstallCustomMultiInstance(
 	// 		*srcSQLFile, *dstSQLPath, *srcCnfFile, *mysqlPwd)
-	case "standard":
-		installer.InstallStandardMultiInstanceOnMultiServer(*srcSQLFile, *servInstInfo, *mysqlPwd)
+	// case "standard":
+	// 	installer.InstallStandardMultiInstanceOnMultiServer(*useSrcFile, *srcSQLFile, *servInstInfo, *mysqlPwd)
+	case "mgr-s":
+		installer.InstallStandardMGRInstance(*useSrcFile, *srcSQLFile, *servInstInfo, *mysqlPwd)
 	}
 	fmt.Print("============================\n\n")
 }
