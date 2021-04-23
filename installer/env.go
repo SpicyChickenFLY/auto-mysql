@@ -1,6 +1,6 @@
-package mysql
+package installer
 
-import "github.com/SpicyChickenFLY/auto-mysql/installer/utils/linux"
+import "github.com/SpicyChickenFLY/auto-mysql/utils/linux"
 
 // PrepareMysqlUbuntu is a func to install all dependencies for
 // MySQL in Ubuntu(Linux OS)

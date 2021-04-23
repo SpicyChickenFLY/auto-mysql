@@ -1,13 +1,13 @@
-package mysql
+package installer
 
 import (
 	"database/sql"
 	"fmt"
 	"time"
 
-	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/db"
-	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/linux"
-	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/progress"
+	"github.com/SpicyChickenFLY/auto-mysql/utils/db"
+	"github.com/SpicyChickenFLY/auto-mysql/utils/linux"
+	"github.com/SpicyChickenFLY/auto-mysql/utils/progress"
 )
 
 const (

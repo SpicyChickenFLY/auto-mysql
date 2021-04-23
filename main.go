@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/SpicyChickenFLY/auto-mysql/installer"
-	"github.com/SpicyChickenFLY/auto-mysql/installer/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/romberli/log"
 )
@@ -20,7 +19,7 @@ const (
 
 	srcSQLFileDef   = "./static/mysql/mysql.tar.gz"
 	dstSQLPathDef   = "/home/chow/Softs/mysql"
-	srcCnfFileDef   = mysql.StdSrcCnfFileDef
+	srcCnfFileDef   = "./static/conf/my.cnf"
 	servInstInfoDef = "root:123@localhost:3306|3307"
 	mysqlPwdDef     = "123456"
 )
@@ -48,7 +47,7 @@ func main() {
 	dstSQLPath := flag.String(
 		"d", dstSQLPathDef, "position for installation")
 	srcCnfFile := flag.String(
-		"c", mysql.StdSrcCnfFileDef, "postion of you configure file")
+		"c", srcCnfFileDef, "postion of you configure file")
 	servInstInfo := flag.String(
 		"i", servInstInfoDef,
 		"information of instance - userName:userPwd@host:port#port1|port2|port3;userName:...")

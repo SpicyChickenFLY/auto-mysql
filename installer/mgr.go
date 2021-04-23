@@ -1,6 +1,6 @@
-package mysql
+package installer
 
-import "github.com/SpicyChickenFLY/auto-mysql/installer/utils/progress"
+import "github.com/SpicyChickenFLY/auto-mysql/utils/progress"
 
 // CreateMGRRelation create Master/Slaves for instances
 //	Procedure

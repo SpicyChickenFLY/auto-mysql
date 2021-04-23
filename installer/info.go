@@ -1,10 +1,9 @@
-package mysql
+package installer
 
 import (
-	"fmt"
 	"strings"
 
-	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/linux"
+	"github.com/SpicyChickenFLY/auto-mysql/utils/linux"
 	"github.com/lingdor/stackerror"
 )
 
@@ -108,25 +107,6 @@ func ParseServerStr(
 		allServInstInfos = append(allServInstInfos, serverInfo)
 	}
 	return allServInstInfos, nil
-}
-
-// CreateMysqlUserWithGroup create mysql:mysql for os
-func CreateMysqlUserWithGroup(
-	servInstInfo *ServerInstanceInfo) error {
-	return linux.CreateUserWithGroup(
-		servInstInfo.ServerInfo, userName, groupName)
-}
-
-// ShowErrorLog show error log on server
-func ShowErrorLog(
-	servInstInfo *ServerInstanceInfo) error {
-	output, err := linux.ExecuteCommand(
-		servInstInfo.ServerInfo, linux.Cat(servInstInfo.InstInfos[0].LogDir))
-	if err != nil {
-		return err
-	}
-	fmt.Println(output)
-	return nil
 }
 
 // KillMysqlProcess kill all process of mysql

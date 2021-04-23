@@ -1,12 +1,19 @@
-package mysql
+package installer
 
 import (
 	"fmt"
 	"path"
 	"time"
 
-	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/db"
-	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/linux"
+	"github.com/SpicyChickenFLY/auto-mysql/utils/db"
+	"github.com/SpicyChickenFLY/auto-mysql/utils/linux"
+)
+
+const (
+	daemonFileName      = "mysqld"
+	daemonFileRel       = "bin/mysqld"
+	singleServerFileRel = "support-files/mysql.server"
+	multiServerFileRel  = "bin/mysqld_multi"
 )
 
 const (

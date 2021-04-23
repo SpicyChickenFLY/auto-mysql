@@ -1,4 +1,4 @@
-package mysql
+package installer
 
 import (
 	"fmt"
@@ -6,8 +6,19 @@ import (
 	"os"
 	"strings"
 
-	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/linux"
+	"github.com/SpicyChickenFLY/auto-mysql/utils/linux"
 	"github.com/SpicyChickenFLY/ini"
+)
+
+const ( // my.cnf placeholder
+	// GeneralTemplate
+	tplSectionClient       = "client"
+	tplSectionDaemonMulti  = "mysqld_multi"
+	tplSectionDaemonSingle = "mysqld"
+
+	// Instance Template
+	tplPlaceHolderInstMulti = "[template]"
+	tplPlaceHolderPort      = "[port]"
 )
 
 const (
@@ -82,17 +93,17 @@ func CheckRquireDirExists(
 	return createDirForMySQL(servInstInfo.ServerInfo, dirListStr)
 }
 
-// GenerateStdCnf generate Standard my.cnf(single/multi) for server
-func GenerateStdCnf(servInstInfo *ServerInstanceInfo) (string, error) {
+// GeneratestdCnf generate Standard my.cnf(single/multi) for server
+func GeneratestdCnf(servInstInfo *ServerInstanceInfo) (string, error) {
 	if _, err := linux.ExecuteCommand(
-		servInstInfo.ServerInfo, linux.Rm(StdSrcCnfFileDef)); err != nil {
+		servInstInfo.ServerInfo, linux.Rm(stdSrcCnfFileDef)); err != nil {
 		return "", err
 	}
-	servInstInfo.BaseDir = StdBaseDir
+	servInstInfo.BaseDir = stdBaseDir
 	cfgGen, err := ini.LoadSources(ini.LoadOptions{
 		AllowBooleanKeys: true,
 		// UnescapeValueDoublQueotes: true,
-	}, StdSrcCnfTemplateGeneral)
+	}, stdSrcCnfTemplateGeneral)
 	if err != nil {
 		return "", err
 	}
@@ -108,9 +119,9 @@ func GenerateStdCnf(servInstInfo *ServerInstanceInfo) (string, error) {
 		return "", err
 	}
 
-	cfgGen.SaveTo(StdSrcCnfFileDef)
+	cfgGen.SaveTo(stdSrcCnfFileDef)
 
-	bytes, err := ioutil.ReadFile(StdSrcCnfTemplateInstance)
+	bytes, err := ioutil.ReadFile(stdSrcCnfTemplateInstance)
 	if err != nil {
 		return "", err
 	}
@@ -118,11 +129,11 @@ func GenerateStdCnf(servInstInfo *ServerInstanceInfo) (string, error) {
 
 	for i := 0; i < len(servInstInfo.InstInfos); i++ {
 		servInstInfo.InstInfos[i].DataDir = fmt.Sprintf(
-			StdDataDir, servInstInfo.InstInfos[i].Port)
+			stdDataDir, servInstInfo.InstInfos[i].Port)
 		servInstInfo.InstInfos[i].LogDir = fmt.Sprintf(
-			StdErrorLogFileDir, servInstInfo.InstInfos[i].Port)
+			stdErrorLogFileDir, servInstInfo.InstInfos[i].Port)
 		servInstInfo.InstInfos[i].SockDir = fmt.Sprintf(
-			StdSockFileDir, servInstInfo.InstInfos[i].Port)
+			stdSockFileDir, servInstInfo.InstInfos[i].Port)
 		var newSecName string
 		if len(servInstInfo.InstInfos) == 1 { // Single instance
 			newSecName = fmt.Sprintf("[%s]",
@@ -137,7 +148,7 @@ func GenerateStdCnf(servInstInfo *ServerInstanceInfo) (string, error) {
 		newInstStr = strings.ReplaceAll(
 			newInstStr, tplPlaceHolderPort, fmt.Sprint(servInstInfo.InstInfos[i].Port))
 
-		fw, err := os.OpenFile(StdSrcCnfFileDef, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+		fw, err := os.OpenFile(stdSrcCnfFileDef, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			return "", err
 		}
@@ -147,7 +158,7 @@ func GenerateStdCnf(servInstInfo *ServerInstanceInfo) (string, error) {
 			return "", err
 		}
 	}
-	return StdSrcCnfFileDef, nil
+	return stdSrcCnfFileDef, nil
 }
 
 func replaceAllValueInCfg(

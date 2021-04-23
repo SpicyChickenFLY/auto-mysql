@@ -1,10 +1,10 @@
-package mysql
+package installer
 
 import (
 	"os"
 	"path"
 
-	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/linux"
+	"github.com/SpicyChickenFLY/auto-mysql/utils/linux"
 	"github.com/lingdor/stackerror"
 )
 
@@ -65,10 +65,6 @@ func ExtractSoftware(
 	}
 	// FIXME: DO NOT copy these file to /usr/bin
 	// TODO: Just export them to path
-	if err := linux.CopyDirOrFileBetweenServers(
-		s, s, path.Join(dstSQLPath, daemonPathRel, allFile), usrBinPath); err != nil {
-		return err
-	}
 
 	// Modify Directory/File
 	return modifyDataDirForMySQL(s, dstSQLPath, sqlFileMode)
@@ -79,7 +75,7 @@ func MoveCnfFile(
 	s *linux.ServerInfo,
 	srcCnfFile string) error {
 	if err := linux.CopyDirOrFileBetweenServers(
-		linux.LocalHost, s, srcCnfFile, StdDstCnfPath); err != nil {
+		linux.LocalHost, s, srcCnfFile, stdDstCnfPath); err != nil {
 		return err
 	}
 	return modifyDataDirForMySQL(s, dstCnfFileDef, cnfFileMode)

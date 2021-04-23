@@ -1,4 +1,4 @@
-package mysql
+package installer
 
 import (
 	"database/sql"

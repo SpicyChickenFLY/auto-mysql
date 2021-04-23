@@ -3,7 +3,7 @@ package progress
 import (
 	"fmt"
 
-	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/colorful"
+	"github.com/SpicyChickenFLY/auto-mysql/utils/colorful"
 )
 
 // Check is a built-in func for checking error and output its result

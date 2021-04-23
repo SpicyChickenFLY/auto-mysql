@@ -3,11 +3,13 @@ package installer
 import (
 	"fmt"
 
-	"github.com/SpicyChickenFLY/auto-mysql/installer/mysql"
-	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/progress"
+	"github.com/SpicyChickenFLY/auto-mysql/utils/linux"
+	"github.com/SpicyChickenFLY/auto-mysql/utils/progress"
 )
 
-const ()
+const (
+	processName = "mysql"
+)
 
 // prepare for mySQL installation
 //	Procedure:
@@ -19,37 +21,37 @@ const ()
 //	4. Create data directory
 func prepare(
 	useSrcFile bool,
-	servInstInfo *mysql.ServerInstanceInfo,
+	servInstInfo *ServerInstanceInfo,
 	srcSQLFile, srcCnfFile string) error {
 	//
 	if err := progress.Check("Install Dependencies",
-		mysql.PrepareMysqlCentos(servInstInfo)); err != nil {
+		PrepareMysqlCentos(servInstInfo)); err != nil {
 		return err
 	}
 	// Create group/user
 	if err := progress.Check("Create group/user",
-		mysql.CreateMysqlUserWithGroup(servInstInfo)); err != nil {
+		linux.CreateUserWithGroup(servInstInfo.ServerInfo, userName, groupName)); err != nil {
 		return err
 	}
 	// Kill exists MySQL process
 	if err := progress.Check("Kill exists MySQL process",
-		mysql.KillMysqlProcess(servInstInfo)); err != nil {
+		linux.KillProcess(servInstInfo.ServerInfo, processName)); err != nil {
 		return err
 	}
 	// Move configure file
 	if err := progress.Check("Move configure file",
-		mysql.MoveCnfFile(servInstInfo.ServerInfo, srcCnfFile)); err != nil {
+		MoveCnfFile(servInstInfo.ServerInfo, srcCnfFile)); err != nil {
 		return err
 	}
 	// Create data directory
 	if err := progress.Check("Create data directory",
-		mysql.CheckRquireDirExists(servInstInfo, srcCnfFile)); err != nil {
+		CheckRquireDirExists(servInstInfo, srcCnfFile)); err != nil {
 		return err
 	}
 	// Decompress the archive if srcSQLFile exists
 	if useSrcFile {
 		return progress.Check("Decompress the archive",
-			mysql.ExtractSoftware(
+			ExtractSoftware(
 				servInstInfo.ServerInfo,
 				srcSQLFile,
 				servInstInfo.BaseDir))
@@ -64,7 +66,7 @@ func prepare(
 //	2. Initialize MySQL(without password)
 func InstallCustomInstance(
 	useSrcFile bool,
-	servInstInfo *mysql.ServerInstanceInfo,
+	servInstInfo *ServerInstanceInfo,
 	srcSQLFile, srcCnfFile string) error {
 	// Prepare for environment
 	if err := prepare(
@@ -74,7 +76,7 @@ func InstallCustomInstance(
 	// Initialize MySQL(without password)
 	if err := progress.Check(
 		"Initialize MySQL(without password)",
-		mysql.InitInstance(servInstInfo)); err != nil {
+		InitInstance(servInstInfo)); err != nil {
 		return err
 	}
 	// Installation compelete
@@ -91,7 +93,7 @@ func InstallStandardMGRInstance(
 	useSrcFile bool, srcSQLFile, infoStr, mysqlPwd string) error {
 
 	// Parse the server parameter
-	allServInstInfos, err := mysql.ParseServerStr(infoStr)
+	allServInstInfos, err := ParseServerStr(infoStr)
 	if progress.Check("Parse the server parameter", err) != nil {
 		return err
 	}
@@ -100,7 +102,7 @@ func InstallStandardMGRInstance(
 		fmt.Printf("--- Server: %s:%d ---\n",
 			servInstInfo.ServerInfo.Host, servInstInfo.ServerInfo.Port)
 		// Generate Cnf for Server
-		srcCnfFile, err := mysql.GenerateStdCnf(servInstInfo)
+		srcCnfFile, err := GeneratestdCnf(servInstInfo)
 		if progress.Check("Generate Cnf for Server", err) != nil {
 			return err
 		}
@@ -115,7 +117,7 @@ func InstallStandardMGRInstance(
 	// Create MGR relationship
 	if len(allServInstInfos) > 1 || len(allServInstInfos[0].InstInfos) > 1 {
 		if err := progress.Check("Create MGR relationship",
-			mysql.CreateMGRRelation(
+			CreateMGRRelation(
 				allServInstInfos, mysqlPwd)); err != nil {
 			return err
 		}
@@ -134,7 +136,7 @@ func InstallStandardReplicaIntance(
 	useSrcFile bool, srcSQLFile, infoStr, mysqlPwd string) error {
 
 	// Parse the server parameter
-	allServInstInfos, err := mysql.ParseServerStr(infoStr)
+	allServInstInfos, err := ParseServerStr(infoStr)
 	if progress.Check("Parse the server parameter", err) != nil {
 		return err
 	}
@@ -143,7 +145,7 @@ func InstallStandardReplicaIntance(
 		fmt.Printf("--- Server: %s:%d ---\n",
 			servInstInfo.ServerInfo.Host, servInstInfo.ServerInfo.Port)
 		// Generate Cnf for Server
-		srcCnfFile, err := mysql.GenerateStdCnf(servInstInfo)
+		srcCnfFile, err := GeneratestdCnf(servInstInfo)
 		if progress.Check("Generate Cnf for Server", err) != nil {
 			return err
 		}
@@ -158,7 +160,7 @@ func InstallStandardReplicaIntance(
 	// Create Master/Slave relationship
 	if len(allServInstInfos) > 1 || len(allServInstInfos[0].InstInfos) > 1 {
 		if err := progress.Check("Create Master/Slave relationship",
-			mysql.CreateReplicaRelation(
+			CreateReplicaRelation(
 				allServInstInfos, mysqlPwd)); err != nil {
 			return err
 		}
