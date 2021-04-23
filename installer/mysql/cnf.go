@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path"
 	"strings"
 
 	"github.com/SpicyChickenFLY/auto-mysql/installer/utils/linux"
@@ -25,21 +24,18 @@ const (
 	relayLogFileKey = "relay_log"
 	slowLogFileKey  = "slow_query_log_file"
 	multiLogFileKey = "log"
-	// value
-	portKey = "port"
 )
 
-// CheckRquireDirExists make sure all dir exists
-func CheckRquireDirExists(
-	servInstInfo *ServerInstanceInfo, srcCnfFile string) error {
-	// Initialize map dictionary
-	cnfDirKey := []string{
+// Initialize map dictionary
+
+var (
+	cnfDirKey = []string{
 		baseDirKey,
 		dataDirKey,
 		tmpDirKey,
 		undoLogDirKey,
 	}
-	cnfFileKey := []string{
+	cnfFileKey = []string{
 		sockFileKey,
 		pidFileKey,
 		errLogFileKey,
@@ -48,8 +44,13 @@ func CheckRquireDirExists(
 		slowLogFileKey,
 		multiLogFileKey,
 	}
-	dirList := ""
+)
 
+// CheckRquireDirExists make sure all dir exists
+func CheckRquireDirExists(
+	servInstInfo *ServerInstanceInfo, srcCnfFile string) error {
+
+	dirList := []string{}
 	cfg, err := ini.LoadSources(ini.LoadOptions{
 		AllowBooleanKeys: true,
 	}, srcCnfFile)
@@ -65,108 +66,100 @@ func CheckRquireDirExists(
 		for _, keyName := range cnfDirKey {
 			if section.Haskey(keyName) {
 				dirPath := section.Key(keyName).Value()
-				dirList += " " + dirPath
-			}
-			if keyName == dataDirKey {
-				dirPath := rootPath
-				dirShards := strings.Split(section.Key(keyName).Value(), "/")
-				for _, dirShard := range dirShards {
-					if !strings.Contains(dirShard, "mysql") {
-						path.Join(dirPath, dirShard)
-					} else {
-						dirPath = path.Join(dirPath, dirShard)
-						modifyDataDir(servInstInfo.ServerInfo, dirPath, sqlFileMode)
-						break
-					}
-				}
+				dirList = append(dirList, dirPath)
 			}
 		}
 		for _, keyName := range cnfFileKey {
-			if section.Haskey(keyName) {
+			if section.HasKey(keyName) {
 				filePath := section.Key(keyName).Value()
-				index := strings.LastIndex(filePath, "/")
-				if index > 0 {
-					dirPath := string([]byte(filePath)[:index])
-					dirList += " " + dirPath
-				}
+				dirIndex := strings.LastIndex(filePath, "/")
+				dirPath := filePath[:dirIndex]
+				dirList = append(dirList, dirPath)
 			}
 		}
 	}
-
-	return createDir(servInstInfo.ServerInfo, dirList)
+	dirListStr := strings.Join(dirList, " ")
+	return createDirForMySQL(servInstInfo.ServerInfo, dirListStr)
 }
 
 // GenerateStdCnf generate Standard my.cnf(single/multi) for server
 func GenerateStdCnf(servInstInfo *ServerInstanceInfo) (string, error) {
 	if _, err := linux.ExecuteCommand(
-		servInstInfo.ServerInfo, linux.Rm(stdSrcCnfFileDef)); err != nil {
+		servInstInfo.ServerInfo, linux.Rm(StdSrcCnfFileDef)); err != nil {
 		return "", err
 	}
-	servInstInfo.BaseDir = stdBaseDir
+	servInstInfo.BaseDir = StdBaseDir
 	cfgGen, err := ini.LoadSources(ini.LoadOptions{
 		AllowBooleanKeys: true,
 		// UnescapeValueDoublQueotes: true,
-	}, stdSrcCnfTemplateGeneral)
+	}, StdSrcCnfTemplateGeneral)
 	if err != nil {
 		return "", err
 	}
 
+	// Judge the count of instances on this server
 	if len(servInstInfo.InstInfos) == 1 { // Single instance
-		cfgGen.DeleteSection(stdSectionMysqlDaemonMulti)
+		cfgGen.DeleteSection(tplSectionDaemonMulti)
+	}
+	if err := replaceAllValueInCfg(
+		cfgGen,
+		tplPlaceHolderPort,
+		fmt.Sprint(servInstInfo.InstInfos[0].Port)); err != nil {
+		return "", err
 	}
 
-	for _, secName := range cfgGen.SectionStrings() {
-		sec, err := cfgGen.GetSection(secName)
-		if err != nil {
-			return "", err
-		}
-		replaceAllValueInSection(
-			sec,
-			templatePortPlaceHolder,
-			fmt.Sprint(servInstInfo.InstInfos[0].Port))
-	}
-	cfgGen.SaveTo(stdSrcCnfFileDef)
+	cfgGen.SaveTo(StdSrcCnfFileDef)
 
-	bytes, err := ioutil.ReadFile(stdSrcCnfTemplateInstance)
+	bytes, err := ioutil.ReadFile(StdSrcCnfTemplateInstance)
 	if err != nil {
 		return "", err
 	}
-	fw, err := os.OpenFile(stdSrcCnfFileDef, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	defer fw.Close()
 	OriginalStr := string(bytes)
+
 	for i := 0; i < len(servInstInfo.InstInfos); i++ {
 		servInstInfo.InstInfos[i].DataDir = fmt.Sprintf(
-			stdDataDir, servInstInfo.InstInfos[i].Port)
+			StdDataDir, servInstInfo.InstInfos[i].Port)
 		servInstInfo.InstInfos[i].LogDir = fmt.Sprintf(
-			stdErrorLogFileDir, servInstInfo.InstInfos[i].Port)
+			StdErrorLogFileDir, servInstInfo.InstInfos[i].Port)
 		servInstInfo.InstInfos[i].SockDir = fmt.Sprintf(
-			stdSockFileDir, servInstInfo.InstInfos[i].Port)
+			StdSockFileDir, servInstInfo.InstInfos[i].Port)
 		var newSecName string
 		if len(servInstInfo.InstInfos) == 1 { // Single instance
 			newSecName = fmt.Sprintf("[%s]",
-				stdSectionMysqlServerGeneral)
+				tplSectionDaemonSingle)
 		} else {
 			newSecName = fmt.Sprintf("[%s%d]",
-				stdSectionMysqlServerGeneral, servInstInfo.InstInfos[i].Port)
+				tplSectionDaemonSingle, servInstInfo.InstInfos[i].Port)
 		}
 		// fmt.Println(len(servInstInfo.InstInfos), newSecName)
-		newInstStr := strings.ReplaceAll(OriginalStr, "[template]", newSecName)
+		newInstStr := strings.ReplaceAll(
+			OriginalStr, tplPlaceHolderInstMulti, newSecName)
 		newInstStr = strings.ReplaceAll(
-			newInstStr,
-			templatePortPlaceHolder,
-			fmt.Sprint(servInstInfo.InstInfos[i].Port))
+			newInstStr, tplPlaceHolderPort, fmt.Sprint(servInstInfo.InstInfos[i].Port))
 
-		_, err := fw.WriteString(newInstStr)
+		fw, err := os.OpenFile(StdSrcCnfFileDef, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			return "", err
 		}
+		defer fw.Close()
+
+		if _, err := fw.WriteString(newInstStr); err != nil {
+			return "", err
+		}
 	}
-	return stdSrcCnfFileDef, nil
+	return StdSrcCnfFileDef, nil
 }
 
-func replaceAllValueInSection(
-	sec *ini.Section, placeHolder, replaceStr string) {
-	for _, key := range sec.Keys() {
-		key.SetValue(strings.Replace(key.Value(), placeHolder, replaceStr, -1))
+func replaceAllValueInCfg(
+	cfgGen *ini.File, placeHolder, replaceStr string) error {
+	for _, secName := range cfgGen.SectionStrings() {
+		sec, err := cfgGen.GetSection(secName)
+		if err != nil {
+			return err
+		}
+		for _, key := range sec.Keys() {
+			key.SetValue(strings.Replace(key.Value(), placeHolder, replaceStr, -1))
+		}
 	}
+	return nil
 }

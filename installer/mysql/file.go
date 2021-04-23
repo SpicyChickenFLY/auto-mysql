@@ -9,7 +9,7 @@ import (
 )
 
 // modify is a func for changing mode and owner for file/dir
-func modifyDataDir(s *linux.ServerInfo, dirPath string, mode uint32) error {
+func modifyDataDirForMySQL(s *linux.ServerInfo, dirPath string, mode uint32) error {
 	if _, err := linux.ExecuteCommand(
 		s, linux.Chown(dirPath, userName, groupName)); err != nil {
 		return err
@@ -22,18 +22,18 @@ func modifyDataDir(s *linux.ServerInfo, dirPath string, mode uint32) error {
 }
 
 // createFile is a func for creating a specified file
-func createFile(
+func createFileForMySQL(
 	s *linux.ServerInfo,
 	filePath string) error {
 	if _, err := linux.ExecuteCommand(
 		s, linux.Touch(filePath)); err != nil {
 		return err
 	}
-	return modifyDataDir(s, filePath, sqlFileMode)
+	return modifyDataDirForMySQL(s, filePath, sqlFileMode)
 }
 
 // createDir is a func for creating a specified dir
-func createDir(
+func createDirForMySQL(
 	s *linux.ServerInfo,
 	dirPath string) error {
 	if _, err := linux.ExecuteCommand(
@@ -44,22 +44,7 @@ func createDir(
 		s, linux.Mkdir(dirPath)); err != nil {
 		return err
 	}
-	return modifyDataDir(s, dirPath, sqlFileMode)
-}
-
-// unTarWithGzip extract a .tar.gz file by name write in SHELL
-func unTarWithGzip(
-	s *linux.ServerInfo,
-	srcFile string, dstPath string) error {
-	if _, err := linux.ExecuteCommand(
-		s, linux.Mkdir(dstPath)); err != nil {
-		return err
-	}
-	if _, err := linux.ExecuteCommand(
-		s, linux.Tar(srcFile, dstPath)); err != nil {
-		return err
-	}
-	return nil
+	return modifyDataDirForMySQL(s, dirPath, sqlFileMode)
 }
 
 // ExtractSoftware is a func to extract mysql archive to specfied dir
@@ -72,6 +57,9 @@ func ExtractSoftware(
 	if _, err := os.Stat(srcSQLFile); err != nil {
 		return stackerror.New("Software not exists")
 	}
+	if err := createDirForMySQL(s, dstSQLPath); err != nil {
+		return err
+	}
 	if err := linux.Unarchive(s, srcSQLFile, dstSQLPath, 1); err != nil {
 		return err
 	}
@@ -83,7 +71,7 @@ func ExtractSoftware(
 	}
 
 	// Modify Directory/File
-	return modifyDataDir(s, dstSQLPath, sqlFileMode)
+	return modifyDataDirForMySQL(s, dstSQLPath, sqlFileMode)
 }
 
 // MoveCnfFile is a func to move custom my.cnf configure to specified dir
@@ -91,10 +79,10 @@ func MoveCnfFile(
 	s *linux.ServerInfo,
 	srcCnfFile string) error {
 	if err := linux.CopyDirOrFileBetweenServers(
-		linux.LocalHost, s, srcCnfFile, stdDstCnfPath); err != nil {
+		linux.LocalHost, s, srcCnfFile, StdDstCnfPath); err != nil {
 		return err
 	}
-	return modifyDataDir(s, dstCnfFileDef, cnfFileMode)
+	return modifyDataDirForMySQL(s, dstCnfFileDef, cnfFileMode)
 }
 
 // MoveDaemonFile is a func to move mysql.server/mysqld_multi.server
@@ -108,7 +96,7 @@ func MoveDaemonFile(
 		srcDaemonFile, dstDaemonFile); err != nil {
 		return err
 	}
-	return modifyDataDir(servInstInfo.ServerInfo, dstDaemonFile, sqlFileMode)
+	return modifyDataDirForMySQL(servInstInfo.ServerInfo, dstDaemonFile, sqlFileMode)
 }
 
 // CopyDataDir is a func to copy files from datadir for master to slaves

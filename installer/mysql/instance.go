@@ -20,7 +20,7 @@ func InitInstance(servInstInfo *ServerInstanceInfo) error {
 		if _, err := linux.ExecuteCommand(
 			servInstInfo.ServerInfo,
 			fmt.Sprintf(
-				`runuser -l mysql -c '%s --initialize-insecure --user=%s --basedir=%s --datadir=%s'`,
+				`%s --initialize-insecure --user=%s --basedir=%s --datadir=%s`,
 				path.Join(servInstInfo.BaseDir, daemonFileRel),
 				linuxUserMysql,
 				servInstInfo.BaseDir,
@@ -36,13 +36,10 @@ func InitInstance(servInstInfo *ServerInstanceInfo) error {
 func StartSingleInst(servInstInfo *ServerInstanceInfo) error {
 	if _, err := linux.ExecuteCommand(
 		servInstInfo.ServerInfo,
-		fmt.Sprintf(`runuser -l mysql -c '%s start'`,
+		fmt.Sprintf(`%s start`,
 			path.Join(servInstInfo.BaseDir, singleServerFileRel))); err != nil {
 		return err
 	}
-	// if err := ShowErrorLog(servInstInfo); err != nil {
-	// 	return err
-	// }
 	return waitInstanceStartStop(servInstInfo, true)
 }
 
@@ -50,7 +47,7 @@ func StartSingleInst(servInstInfo *ServerInstanceInfo) error {
 func StopSingleInst(servInstInfo *ServerInstanceInfo) error {
 	if _, err := linux.ExecuteCommand(
 		servInstInfo.ServerInfo,
-		fmt.Sprintf(`runuser -l mysql -c '%s stop'`,
+		fmt.Sprintf(`%s stop`,
 			path.Join(servInstInfo.BaseDir, singleServerFileRel))); err != nil {
 		return err
 	}
@@ -63,7 +60,7 @@ func StartMultiInst(servInstInfo *ServerInstanceInfo) error {
 		// fmt.Println(servInstInfo.ServerInfo)
 		if _, err := linux.ExecuteCommand(
 			servInstInfo.ServerInfo,
-			fmt.Sprintf(`runuser -l mysql -c '%s start %d'`,
+			fmt.Sprintf(`%s start %d`,
 				path.Join(servInstInfo.BaseDir, multiServerFileRel),
 				instInfo.Port)); err != nil {
 			return err
@@ -77,7 +74,7 @@ func StopMultiInst(servInstInfo *ServerInstanceInfo) error {
 	for _, instInfo := range servInstInfo.InstInfos {
 		if _, err := linux.ExecuteCommand(
 			servInstInfo.ServerInfo,
-			fmt.Sprintf(`runuser -l mysql -c '%s stop %d'`,
+			fmt.Sprintf(`%s stop %d`,
 				path.Join(servInstInfo.BaseDir, multiServerFileRel),
 				instInfo.Port)); err != nil {
 			return err
@@ -86,8 +83,8 @@ func StopMultiInst(servInstInfo *ServerInstanceInfo) error {
 	return waitInstanceStartStop(servInstInfo, false)
 }
 
-// ModifyPwdForAllInstOfServer modify pwd for all instances in one server
-func ModifyPwdForAllInstOfServer(
+// ModifyPwdForAllInstForFirstTime modify pwd for all instances in one server
+func ModifyPwdForAllInstForFirstTime(
 	servInstInfo *ServerInstanceInfo, port []int, prevPwd, newPwd string) error {
 	for _, instInfo := range servInstInfo.InstInfos {
 		conn, err := db.CreateConn(servInstInfo.ServerInfo.Host, instInfo.Port, prevPwd)

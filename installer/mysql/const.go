@@ -31,22 +31,24 @@ const (
 )
 
 const (
-	stdDstCnfPath             = "/etc"
-	stdSrcCnfTemplateGeneral  = "./static/conf/template_gen.cnf"
-	stdSrcCnfTemplateInstance = "./static/conf/template_inst.cnf"
-	stdSrcCnfFileDef          = "./static/conf/my.cnf"
+	StdDstCnfPath             = "/etc"
+	StdSrcCnfTemplateGeneral  = "./static/conf/template_gen.cnf"
+	StdSrcCnfTemplateInstance = "./static/conf/template_inst.cnf"
+	StdSrcCnfFileDef          = "./static/conf/my.cnf"
 
-	templateSectionName     = "template"
-	templatePortPlaceHolder = "[port]"
-
-	stdBaseDir         = "/usr/local/mysql"
-	stdDataDir         = "/mysqldata/mysql%d/data"
-	stdErrorLogFileDir = "/mysqldata/mysql%d/log/mysqld.log"
-	stdSockFileDir     = "/mysqldata/mysql%d/mysql.sock"
+	StdBaseDir         = "/usr/local/mysql"
+	StdDataDir         = "/mysqldata/mysql%d/data"
+	StdErrorLogFileDir = "/mysqldata/mysql%d/log/mysqld.log"
+	StdSockFileDir     = "/mysqldata/mysql%d/mysql.sock"
 )
 
-const (
-	stdSectionClient             = "client"
-	stdSectionMysqlDaemonMulti   = "mysqld_multi"
-	stdSectionMysqlServerGeneral = "mysqld"
+const ( // my.cnf placeholder
+	// GeneralTemplate
+	tplSectionClient       = "client"
+	tplSectionDaemonMulti  = "mysqld_multi"
+	tplSectionDaemonSingle = "mysqld"
+
+	// Instance Template
+	tplPlaceHolderInstMulti = "[template]"
+	tplPlaceHolderPort      = "[port]"
 )
