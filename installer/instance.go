@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"errors"
 	"fmt"
 	"path"
 	"time"
@@ -18,7 +19,7 @@ const (
 
 const (
 	instWaitTimeout      = 100 // ms
-	instWaitTimeoutRetry = 1
+	instWaitTimeoutRetry = 5
 )
 
 // InitInstance is a func to initialize the mysql instance without password
@@ -47,7 +48,19 @@ func StartSingleInst(servInstInfo *ServerInstanceInfo) error {
 			path.Join(servInstInfo.BaseDir, singleServerFileRel))); err != nil {
 		return err
 	}
-	return waitInstanceStartStop(servInstInfo, true)
+	// wait for instance start
+	for i := 0; i < instWaitTimeoutRetry; i++ {
+		output, err := linux.FindProcess(
+			servInstInfo.ServerInfo, daemonFileName)
+		if err != nil {
+			return err
+		}
+		if len(output) > 0 {
+			return nil
+		}
+		time.Sleep(time.Duration(instWaitTimeout) * time.Millisecond)
+	}
+	return errors.New("wait too long to start single instance ")
 }
 
 // StopSingleInst is a func to stop mysql Instance automaticaly
@@ -58,7 +71,19 @@ func StopSingleInst(servInstInfo *ServerInstanceInfo) error {
 			path.Join(servInstInfo.BaseDir, singleServerFileRel))); err != nil {
 		return err
 	}
-	return waitInstanceStartStop(servInstInfo, true)
+	// wait for instance stop
+	for i := 0; i < instWaitTimeoutRetry; i++ {
+		output, err := linux.FindProcess(
+			servInstInfo.ServerInfo, daemonFileName)
+		if err != nil {
+			return err
+		}
+		if len(output) == 0 {
+			return nil
+		}
+		time.Sleep(time.Duration(instWaitTimeout) * time.Millisecond)
+	}
+	return errors.New("wait too long to stop single instance ")
 }
 
 // StartMultiInst is a func to start mysql Instance automaticaly
@@ -72,8 +97,25 @@ func StartMultiInst(servInstInfo *ServerInstanceInfo) error {
 				instInfo.Port)); err != nil {
 			return err
 		}
+		// wait for multi instance start
+		i := 0
+		for i < instWaitTimeoutRetry {
+			output, err := linux.FindProcess(
+				servInstInfo.ServerInfo, daemonFileName, fmt.Sprint(instInfo.Port))
+			if err != nil {
+				return err
+			}
+			if len(output) == 0 {
+				break
+			}
+			time.Sleep(time.Duration(instWaitTimeout) * time.Millisecond)
+			i++
+		}
+		if i == instWaitTimeoutRetry {
+			return errors.New("wait too long to start multi instance ")
+		}
 	}
-	return waitInstanceStartStop(servInstInfo, true)
+	return nil
 }
 
 // StopMultiInst is a func to start mysql Instance automaticaly
@@ -86,8 +128,25 @@ func StopMultiInst(servInstInfo *ServerInstanceInfo) error {
 				instInfo.Port)); err != nil {
 			return err
 		}
+		// wait for multi instance stop
+		i := 0
+		for i < instWaitTimeoutRetry {
+			output, err := linux.FindProcess(
+				servInstInfo.ServerInfo, daemonFileName, fmt.Sprint(instInfo.Port))
+			if err != nil {
+				return err
+			}
+			if len(output) == 0 {
+				break
+			}
+			time.Sleep(time.Duration(instWaitTimeout) * time.Millisecond)
+			i++
+		}
+		if i == instWaitTimeoutRetry {
+			return errors.New("wait too long to stop multi instance ")
+		}
 	}
-	return waitInstanceStartStop(servInstInfo, false)
+	return nil
 }
 
 // ModifyPwdForAllInstForFirstTime modify pwd for all instances in one server
@@ -99,15 +158,9 @@ func ModifyPwdForAllInstForFirstTime(
 			return err
 		}
 		defer conn.Close()
-		if err := db.ModifyMysqlPwd(conn, newPwd); err != nil {
+		if err := db.ModifyPwdForFirstTime(conn, newPwd); err != nil {
 			return err
 		}
 	}
-	return nil
-}
-
-func waitInstanceStartStop(
-	servInstInfo *ServerInstanceInfo, startStop bool) error {
-	time.Sleep(time.Duration(5) * time.Second)
 	return nil
 }
