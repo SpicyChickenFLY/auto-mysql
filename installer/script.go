@@ -12,8 +12,8 @@ const (
 )
 
 // prepare for mySQL installation
+// NOTE: Following procedures are not forcely required
 //	Procedure:
-
 //	1. Create group/user
 // Kill exists MySQL process
 //	2. Decompress the archive
@@ -59,7 +59,7 @@ func prepare(
 	return nil
 }
 
-// InstallCustomInstance install MySQL single instance
+// InstallCustomInstance install MySQL single instance with custom conf
 // on  server
 //	Procedure:
 //	1. Prepare for environment for Installation
@@ -83,7 +83,7 @@ func InstallCustomInstance(
 	return progress.Check("Install Compelete", nil)
 }
 
-// InstallStandardMGRInstance is a func
+// InstallStandardMGRInstance install MGR group with standard conf
 //	Procedure:
 //	1. Parse the server parameter
 //	2. Generate Cnf for each server
@@ -126,7 +126,7 @@ func InstallStandardMGRInstance(
 	return nil
 }
 
-// InstallStandardReplicaIntance is a func
+// InstallStandardReplicaIntance install Replication group with standard conf
 //	Procedure:
 //	1. Parse the server parameter
 //	2. Generate Cnf for each server
