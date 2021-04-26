@@ -108,12 +108,3 @@ func ParseServerStr(
 	}
 	return allServInstInfos, nil
 }
-
-// KillMysqlProcess kill all process of mysql
-func KillMysqlProcess(
-	servInstInfo *ServerInstanceInfo) error {
-	_, err := linux.ExecuteCommand(
-		servInstInfo.ServerInfo,
-		"ps -ef | grep mysql | grep -v grep | cut -c 9-15 | xargs kill -s 9")
-	return err
-}
