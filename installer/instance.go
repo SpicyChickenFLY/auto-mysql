@@ -22,7 +22,7 @@ const (
 	instWaitTimeoutRetry = 5
 )
 
-// InitInstance is a func to initialize the mysql instance without password
+// InitInstance initialize the mysql instance without password
 func InitInstance(servInstInfo *ServerInstanceInfo) error {
 	for _, instInfo := range servInstInfo.InstInfos {
 		if _, err := linux.ExecuteCommand(
@@ -40,7 +40,7 @@ func InitInstance(servInstInfo *ServerInstanceInfo) error {
 	return nil
 }
 
-// StartSingleInst is a func to start mysql Instance automaticaly
+// StartSingleInst start single instances on specified server
 func StartSingleInst(servInstInfo *ServerInstanceInfo) error {
 	if _, err := linux.ExecuteCommand(
 		servInstInfo.ServerInfo,
@@ -63,7 +63,7 @@ func StartSingleInst(servInstInfo *ServerInstanceInfo) error {
 	return errors.New("wait too long to start single instance ")
 }
 
-// StopSingleInst is a func to stop mysql Instance automaticaly
+// StopSingleInst stop single instances on specified server
 func StopSingleInst(servInstInfo *ServerInstanceInfo) error {
 	if _, err := linux.ExecuteCommand(
 		servInstInfo.ServerInfo,
@@ -86,7 +86,7 @@ func StopSingleInst(servInstInfo *ServerInstanceInfo) error {
 	return errors.New("wait too long to stop single instance ")
 }
 
-// StartMultiInst is a func to start mysql Instance automaticaly
+// StartMultiInst start multi instances on specified server
 func StartMultiInst(servInstInfo *ServerInstanceInfo) error {
 	for _, instInfo := range servInstInfo.InstInfos {
 		// fmt.Println(servInstInfo.ServerInfo)
@@ -118,7 +118,7 @@ func StartMultiInst(servInstInfo *ServerInstanceInfo) error {
 	return nil
 }
 
-// StopMultiInst is a func to start mysql Instance automaticaly
+// StopMultiInst stop multi instances on specified server
 func StopMultiInst(servInstInfo *ServerInstanceInfo) error {
 	for _, instInfo := range servInstInfo.InstInfos {
 		if _, err := linux.ExecuteCommand(
